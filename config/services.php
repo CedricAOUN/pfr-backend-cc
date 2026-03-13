@@ -35,4 +35,15 @@ return [
         ],
     ],
 
+    'stripe' => [
+        'secret'         => env('STRIPE_SECRET_KEY'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+        'packages' => [
+            'premium_monthly' => ['price_id' => env('STRIPE_PRICE_PREMIUM_MONTHLY'), 'days' => 30,  'grants_expert' => false],
+            'premium_yearly'  => ['price_id' => env('STRIPE_PRICE_PREMIUM_YEARLY'),  'days' => 365, 'grants_expert' => false],
+            'expert_monthly'  => ['price_id' => env('STRIPE_PRICE_EXPERT_MONTHLY'),  'days' => 30,  'grants_expert' => true],
+            'expert_yearly'   => ['price_id' => env('STRIPE_PRICE_EXPERT_YEARLY'),   'days' => 365, 'grants_expert' => true],
+        ],
+    ],
+
 ];

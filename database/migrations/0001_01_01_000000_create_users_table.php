@@ -20,6 +20,7 @@ return new class extends Migration
             $table->rememberToken();
             $table->boolean('is_premium')->default(false);
             $table->boolean('is_expert')->default(false);
+            $table->boolean('is_admin')->default(false);
             $table->timestamp('premium_expire')->nullable();
             $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();

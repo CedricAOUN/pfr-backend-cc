@@ -28,3 +28,7 @@ Route::prefix('courses')->group(function () {
   Route::delete('delete/{course}', [App\Http\Controllers\API\CourseController::class, 'destroy'])->middleware('auth:sanctum')->name('courses.destroy');
   Route::get('{course}/video', [App\Http\Controllers\API\CourseController::class, 'streamVideo'])->middleware('auth:sanctum')->name('courses.video');
 });
+
+// Stripe: session creation requires auth; webhook is public but signature-verified
+Route::post('stripe/checkout', [App\Http\Controllers\API\StripeController::class, 'createCheckoutSession'])->middleware('auth:sanctum')->name('stripe.checkout');
+Route::post('stripe/webhook', [App\Http\Controllers\API\StripeController::class, 'handleWebhook'])->name('stripe.webhook');

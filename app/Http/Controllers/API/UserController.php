@@ -97,14 +97,14 @@ class UserController extends Controller
 
   function makePremium(Request $request, User $user)
   {
-    Gate::authorize('modify-user', $user);
-    // TODO: Need to validate payment here later.
-    $end_date = $request->input('premium_expire');
-    if (!$end_date) {
-      return response()->json(['message' => 'premium_expire date is required'], 400);
-    }
+    // Admin-only: premium is normally granted automatically via Stripe webhook.
+    // This endpoint exists for manual overrides (e.g. customer support).
+    Gate::authorize('is-admin');
+    $validated = $request->validate([
+      'premium_expire' => 'required|date|after:today',
+    ]);
     $user->is_premium = true;
-    $user->premium_expire = $end_date;
+    $user->premium_expire = $validated['premium_expire'];
     $user->save();
     return new UserResource($user);
   }
