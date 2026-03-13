@@ -69,20 +69,18 @@ class UserController extends Controller
       'first_name' => 'sometimes|nullable|string|max:255',
       'last_name'  => 'sometimes|nullable|string|max:255',
       'biography'  => 'sometimes|nullable|string',
-      'avatar'     => 'sometimes|nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+      'avatar_url' => 'sometimes|nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
     ]);
 
-    if ($request->hasFile('avatar')) {
-      // Delete old avatar if exists
+    if ($request->hasFile('avatar_url')) {
       if ($user->avatar_url) {
         $oldPath = str_replace('/storage/', '', parse_url($user->avatar_url, PHP_URL_PATH));
         Storage::disk('public')->delete($oldPath);
       }
-      $path = $request->file('avatar')->store('user_avatars', 'public');
+      $path = $request->file('avatar_url')->store('user_avatars', 'public');
       $validated['avatar_url'] = Storage::url($path);
     }
 
-    unset($validated['avatar']);
     $user->update($validated);
     return new UserResource($user);
   }
