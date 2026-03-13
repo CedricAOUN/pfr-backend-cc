@@ -19,19 +19,13 @@ class RecipeResource extends JsonResource
             ? $this->likes->contains('user_id', $user->id)
             : false;
 
-        $creator = [
-            'id' => $this->creator->id,
-            'name' => $this->creator->name,
-            'first_name' => $this->creator->first_name,
-            'last_name' => $this->creator->last_name,
-            'avatar_url' => $this->creator->avatar_url,
-        ];
+        $creator = collect($this->creator)->only(['id', 'name', 'first_name', 'last_name', 'avatar_url']);
 
         return [
             'id' => $this->id,
             'title' => $this->title,
             'description' => $this->description,
-            'ingredients' => json_decode($this->ingredients, true),
+            'ingredients' => IngredientResource::collection($this->whenLoaded('ingredients') ?: collect()),
             'instructions' => $this->instructions,
             'is_premium' => $this->is_premium,
             'image_url' => $this->image_url,

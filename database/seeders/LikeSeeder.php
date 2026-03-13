@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Like;
 use App\Models\Recipe;
+use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -18,7 +19,7 @@ class LikeSeeder extends Seeder
 
         foreach ($recipes as $recipe) {
             Like::create([
-                'amount' => rand(5, 150),
+                'user_id' => 1,
                 'recipe_id' => $recipe->id,
             ]);
         }

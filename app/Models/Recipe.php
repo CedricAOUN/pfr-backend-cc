@@ -9,7 +9,6 @@ class Recipe extends Model
     protected $fillable = [
         'title',
         'description',
-        'ingredients',
         'instructions',
         'is_premium',
         'creator_id',
@@ -30,5 +29,9 @@ class Recipe extends Model
     public function favorites()
     {
         return $this->hasMany(Favorite::class, 'recipe_id');
+    }
+    public function ingredients()
+    {
+        return $this->hasMany(Ingredient::class);
     }
 }

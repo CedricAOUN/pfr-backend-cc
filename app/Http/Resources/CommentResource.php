@@ -14,10 +14,12 @@ class CommentResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $creator = collect($this->creator)->only(['id', 'name', 'first_name', 'last_name', 'avatar_url']);
+
         return [
             'id' => $this->id,
             'content' => $this->content,
-            'creator' => new UserResource($this->whenLoaded('creator')),
+            'creator' => $creator,
             'recipe_id' => $this->recipe_id,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

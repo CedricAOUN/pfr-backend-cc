@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->text('description');
-            $table->text('ingredients');
+
             $table->text('instructions');
             $table->boolean('is_premium')->default(false);
             $table->unsignedBigInteger('creator_id');
