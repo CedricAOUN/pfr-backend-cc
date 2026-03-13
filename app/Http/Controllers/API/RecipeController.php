@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\RecipeResource;
 use App\Models\Recipe;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class RecipeController extends Controller
 {
@@ -31,18 +32,15 @@ class RecipeController extends Controller
 
   function show(Recipe $recipe)
   {
-    $user = auth('sanctum')->user();
-    if ($recipe->is_premium && (!$user || !$user->is_premium)) {
-      return response()->json(['message' => 'This recipe is premium and cannot be accessed without a subscription.'], 403);
+    if ($recipe->is_premium) {
+      Gate::authorize('is-premium');
     }
     return new RecipeResource($recipe->load(['creator', 'comments.creator', 'likes', 'favorites', 'ingredients'])->loadCount(['likes', 'favorites']));
   }
 
   function store(Request $request)
   {
-    if (!$request->user()->is_premium) {
-      return response()->json(['message' => 'Only premium users can create recipes.'], 403);
-    }
+    Gate::authorize('is-premium');
     $validated = $request->validate([
       'title' => 'required|string|max:255',
       'description' => 'required|string',
@@ -62,9 +60,7 @@ class RecipeController extends Controller
 
   function update(Request $request, Recipe $recipe)
   {
-    if ($request->user()->id !== $recipe->creator_id) {
-      return response()->json(['message' => 'Unauthorized'], 403);
-    }
+    Gate::authorize('modify-recipe', $recipe);
     $validated = $request->validate([
       'title' => 'string|max:255',
       'description' => 'string',
@@ -87,9 +83,7 @@ class RecipeController extends Controller
 
   function destroy(Request $request, Recipe $recipe)
   {
-    if ($request->user()->id !== $recipe->creator_id) {
-      return response()->json(['message' => 'Unauthorized'], 403);
-    }
+    Gate::authorize('modify-recipe', $recipe);
     $recipe->delete();
     return response()->noContent();
   }
