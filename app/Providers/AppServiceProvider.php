@@ -15,8 +15,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Role gates
-        Gate::define('is-premium', fn(User $user) => $user->is_premium);
-        Gate::define('is-expert',  fn(User $user) => $user->is_expert);
+        Gate::define('is-premium', fn(User $user) => $user->is_premium && $user->premium_expire && $user->premium_expire->isFuture());
+        Gate::define('is-expert',  fn(User $user) => $user->is_expert  && $user->is_premium && $user->premium_expire && $user->premium_expire->isFuture());
         Gate::define('is-admin',   fn(User $user) => $user->is_admin);
 
         // Ownership gates

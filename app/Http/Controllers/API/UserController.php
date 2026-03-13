@@ -111,7 +111,7 @@ class UserController extends Controller
 
   function revokePremium(Request $request, User $user)
   {
-    Gate::authorize('modify-user', $user);
+    Gate::authorize('is-admin');
     $user->is_premium = false;
     $user->premium_expire = null;
     $user->save();
