@@ -21,7 +21,9 @@ class UserResource extends JsonResource
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
             'biography' => $this->biography,
-            'avatar_url' => $this->avatar_url,
+            'avatar_url' => $this->avatar_url
+                ? (str_starts_with($this->avatar_url, 'http') ? $this->avatar_url : asset($this->avatar_url))
+                : null,
             'is_premium' => $this->is_premium,
             'is_expert' => $this->is_expert,
             'premium_expire' => $this->premium_expire,

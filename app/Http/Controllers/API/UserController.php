@@ -7,6 +7,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -64,12 +65,24 @@ class UserController extends Controller
       return response()->json(['message' => 'Unauthorized'], 403);
     }
     $validated = $request->validate([
-      'name' => 'sometimes|required|string|max:255',
+      'name'       => 'sometimes|required|string|max:255',
       'first_name' => 'sometimes|nullable|string|max:255',
-      'last_name' => 'sometimes|nullable|string|max:255',
-      'biography' => 'sometimes|nullable|string',
-      'avatar_url' => 'sometimes|nullable|string|max:255',
+      'last_name'  => 'sometimes|nullable|string|max:255',
+      'biography'  => 'sometimes|nullable|string',
+      'avatar'     => 'sometimes|nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
     ]);
+
+    if ($request->hasFile('avatar')) {
+      // Delete old avatar if exists
+      if ($user->avatar_url) {
+        $oldPath = str_replace('/storage/', '', parse_url($user->avatar_url, PHP_URL_PATH));
+        Storage::disk('public')->delete($oldPath);
+      }
+      $path = $request->file('avatar')->store('user_avatars', 'public');
+      $validated['avatar_url'] = Storage::url($path);
+    }
+
+    unset($validated['avatar']);
     $user->update($validated);
     return new UserResource($user);
   }
