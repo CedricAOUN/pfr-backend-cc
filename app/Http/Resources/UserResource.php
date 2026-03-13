@@ -14,6 +14,21 @@ class UserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+
+        $favoriteRecipeIds = $this->whenLoaded('favorites', fn() => $this->favorites->pluck('recipe_id'));
+
+        $favoriteRecipeCards = [];
+
+        foreach ($favoriteRecipeIds as $recipeId) {
+            $recipe = $this->favorites->firstWhere('recipe_id', $recipeId)->recipe;
+            $favoriteRecipeCards[] = [
+                'id' => $recipeId,
+                'title' => $recipe->title,
+                'description' => $recipe->description,
+                'image_url' => $recipe->image_url,
+            ];
+        }
+
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -29,6 +44,7 @@ class UserResource extends JsonResource
             'premium_expire' => $this->premium_expire,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'favorite_recipes' => $this->whenLoaded('favorites', fn() => $favoriteRecipeCards),
         ];
     }
 }

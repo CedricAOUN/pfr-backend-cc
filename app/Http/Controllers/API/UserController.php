@@ -31,7 +31,7 @@ class UserController extends Controller
 
   function show(User $user)
   {
-    return new UserResource($user);
+    return new UserResource($user->load('favorites'));
   }
   function register(Request $request)
   {
