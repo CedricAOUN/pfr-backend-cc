@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\CourseResource;
 use App\Models\Course;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class CourseController extends Controller
 {
@@ -27,5 +28,104 @@ class CourseController extends Controller
   function show(Course $course)
   {
     return new CourseResource($course->load('expert'));
+  }
+
+  function store(Request $request)
+  {
+    if (!$request->user()->is_expert) {
+      return response()->json(['message' => 'Only experts can create courses.'], 403);
+    }
+
+    $validated = $request->validate([
+      'title'      => 'required|string|max:255',
+      'description' => 'required|string',
+      'content'    => 'sometimes|nullable|string',
+      'video'      => 'nullable|file|mimes:mp4,mov,avi,wmv|max:204800', // 200 MB
+    ]);
+
+    $videoPath = null;
+    if ($request->hasFile('video')) {
+      $videoPath = $request->file('video')->store('course_videos', 'local');
+    }
+
+    $course = Course::create([
+      'title'       => $validated['title'],
+      'description' => $validated['description'],
+      'content'     => $validated['content'] ?? null,
+      'video_path'  => $videoPath,
+      'expert_id'   => $request->user()->id,
+    ]);
+
+    return new CourseResource($course);
+  }
+
+  function update(Request $request, Course $course)
+  {
+    if ($request->user()->id !== $course->expert_id) {
+      return response()->json(['message' => 'Unauthorized'], 403);
+    }
+
+    $validated = $request->validate([
+      'title'       => 'sometimes|required|string|max:255',
+      'description' => 'sometimes|required|string',
+      'content'     => 'sometimes|nullable|string',
+      'video'      => 'nullable|file|mimes:mp4,mov,avi,wmv|max:204800', // 200 MB
+    ]);
+
+    if (isset($validated['title'])) {
+      $course->title = $validated['title'];
+    }
+    if (isset($validated['description'])) {
+      $course->description = $validated['description'];
+    }
+    if (array_key_exists('content', $validated)) {
+      $course->content = $validated['content'];
+    }
+    if ($request->hasFile('video')) {
+      // Delete old video if exists
+      if ($course->video_path && Storage::disk('local')->exists($course->video_path)) {
+        Storage::disk('local')->delete($course->video_path);
+      }
+      // Store new video
+      $course->video_path = $request->file('video')->store('course_videos', 'local');
+    }
+
+    $course->save();
+
+    return new CourseResource($course);
+  }
+
+  function destroy(Request $request, Course $course)
+  {
+    if ($request->user()->id !== $course->expert_id) {
+      return response()->json(['message' => 'Unauthorized'], 403);
+    }
+    // Delete video file if exists
+    if ($course->video_path && Storage::disk('local')->exists($course->video_path)) {
+      Storage::disk('local')->delete($course->video_path);
+    }
+    $course->delete();
+    return response()->noContent();
+  }
+
+  function streamVideo(Request $request, Course $course)
+  {
+    $user = $request->user();
+
+    if (!$user->is_premium) {
+      return response()->json(['message' => 'Premium subscription required.'], 403);
+    }
+
+    if (!$course->video_path || !Storage::disk('local')->exists($course->video_path)) {
+      return response()->json(['message' => 'Video not found.'], 404);
+    }
+
+    $fullPath = Storage::disk('local')->path($course->video_path);
+    $mimeType = mime_content_type($fullPath) ?: 'video/mp4';
+
+    return response()->file($fullPath, [
+      'Content-Type'        => $mimeType,
+      'Content-Disposition' => 'inline',
+    ]);
   }
 }

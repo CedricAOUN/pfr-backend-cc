@@ -34,4 +34,11 @@ class Recipe extends Model
     {
         return $this->hasMany(Ingredient::class);
     }
+
+    protected function casts()
+    {
+        return [
+            'is_premium' => 'boolean',
+        ];
+    }
 }

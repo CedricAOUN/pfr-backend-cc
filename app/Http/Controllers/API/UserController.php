@@ -49,23 +49,26 @@ class UserController extends Controller
     return response()->json(['user' => new UserResource($user), 'access_token' => $token, 'token_type' => 'Bearer']);
   }
 
-  function destroy(User $user)
+  function destroy(Request $request, User $user)
   {
+    if ($request->user()->id !== $user->id) {
+      return response()->json(['message' => 'Unauthorized'], 403);
+    }
     $user->delete();
     return response()->noContent();
   }
 
   function updateInfo(Request $request, User $user)
   {
+    if ($request->user()->id !== $user->id) {
+      return response()->json(['message' => 'Unauthorized'], 403);
+    }
     $validated = $request->validate([
       'name' => 'sometimes|required|string|max:255',
       'first_name' => 'sometimes|nullable|string|max:255',
       'last_name' => 'sometimes|nullable|string|max:255',
       'biography' => 'sometimes|nullable|string',
       'avatar_url' => 'sometimes|nullable|string|max:255',
-      'is_premium' => 'sometimes|required|boolean',
-      'is_expert' => 'sometimes|required|boolean',
-      'premium_expire' => 'sometimes|nullable|date',
     ]);
     $user->update($validated);
     return new UserResource($user);
@@ -86,16 +89,27 @@ class UserController extends Controller
     return new UserResource($user);
   }
 
-  function makePremium(User $user)
+  function makePremium(Request $request, User $user)
   {
+    if ($request->user()->id !== $user->id) {
+      return response()->json(['message' => 'Unauthorized'], 403);
+    }
+    // TODO: Need to validate payment here later.
+    $end_date = $request->input('premium_expire');
+    if (!$end_date) {
+      return response()->json(['message' => 'premium_expire date is required'], 400);
+    }
     $user->is_premium = true;
-    $user->premium_expire = now()->addYear();
+    $user->premium_expire = $end_date;
     $user->save();
     return new UserResource($user);
   }
 
-  function revokePremium(User $user)
+  function revokePremium(Request $request, User $user)
   {
+    if ($request->user()->id !== $user->id) {
+      return response()->json(['message' => 'Unauthorized'], 403);
+    }
     $user->is_premium = false;
     $user->premium_expire = null;
     $user->save();

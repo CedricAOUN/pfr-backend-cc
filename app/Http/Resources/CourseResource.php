@@ -18,7 +18,9 @@ class CourseResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'description' => $this->description,
-            'video_url' => $this->video_url,
+            'video_stream_url' => $this->video_path
+                ? route('courses.video', $this->id)
+                : null,
             'expert' => new UserResource($this->whenLoaded('expert')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

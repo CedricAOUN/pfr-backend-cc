@@ -40,6 +40,9 @@ class RecipeController extends Controller
 
   function store(Request $request)
   {
+    if (!$request->user()->is_premium) {
+      return response()->json(['message' => 'Only premium users can create recipes.'], 403);
+    }
     $validated = $request->validate([
       'title' => 'required|string|max:255',
       'description' => 'required|string',
@@ -55,5 +58,39 @@ class RecipeController extends Controller
       $recipe->ingredients()->create($ingredient);
     }
     return new RecipeResource($recipe->load('ingredients'));
+  }
+
+  function update(Request $request, Recipe $recipe)
+  {
+    if ($request->user()->id !== $recipe->creator_id) {
+      return response()->json(['message' => 'Unauthorized'], 403);
+    }
+    $validated = $request->validate([
+      'title' => 'string|max:255',
+      'description' => 'string',
+      'ingredients' => 'array',
+      'ingredients.*.name' => 'string',
+      'ingredients.*.quantity' => 'numeric',
+      'ingredients.*.unit' => 'string',
+      'instructions' => 'string',
+      'is_premium' => 'boolean',
+    ]);
+    $recipe->update($validated);
+    if (isset($validated['ingredients'])) {
+      $recipe->ingredients()->delete();
+      foreach ($validated['ingredients'] as $ingredient) {
+        $recipe->ingredients()->create($ingredient);
+      }
+    }
+    return new RecipeResource($recipe->load('ingredients'));
+  }
+
+  function destroy(Request $request, Recipe $recipe)
+  {
+    if ($request->user()->id !== $recipe->creator_id) {
+      return response()->json(['message' => 'Unauthorized'], 403);
+    }
+    $recipe->delete();
+    return response()->noContent();
   }
 }

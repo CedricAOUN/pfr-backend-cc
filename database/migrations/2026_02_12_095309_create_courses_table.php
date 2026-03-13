@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->text('description');
-            $table->string('video_url');
+            $table->text('content')->nullable();
+            $table->string('video_path')->nullable();
             $table->unsignedBigInteger('expert_id');
             $table->foreign('expert_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
