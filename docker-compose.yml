@@ -1,0 +1,11 @@
+services:
+  db:
+    container_name: pfr-db
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: pfr_user
+      MYSQL_PASSWORD: pfr_password
+      MYSQL_DATABASE: pfr_backend_cc
+    ports:
+      - "3306:3306"
