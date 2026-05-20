@@ -11,6 +11,7 @@ Route::prefix('users')->group(function () {
   Route::delete('delete/{user}', [App\Http\Controllers\API\UserController::class, 'destroy'])->middleware('auth:sanctum')->name('users.destroy');
   Route::post('login', [App\Http\Controllers\API\UserController::class, 'login'])->name('login');
   Route::post('register', [App\Http\Controllers\API\UserController::class, 'register'])->name('register');
+  Route::post('logout', [App\Http\Controllers\API\UserController::class, 'logout'])->middleware('auth:sanctum')->name('logout');
 });
 
 Route::prefix('recipes')->group(function () {
