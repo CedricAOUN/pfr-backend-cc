@@ -40,7 +40,6 @@ class UserController extends Controller
     $user = User::create(['name' => $validated['name'], 'email' => $validated['email'], 'password' => Hash::make($validated['password']),]);
     return new UserResource($user);
   }
-
   function login(Request $request)
   {
     $validated = $request->validate(['email' => 'required|string|email', 'password' => 'required|string',]);
@@ -56,6 +55,11 @@ class UserController extends Controller
   {
     $request->user()->currentAccessToken()->delete();
     return response()->json(['message' => 'Logged out']);
+  }
+
+  function me(Request $request)
+  {
+    return new UserResource($request->user()->load('favorites'));
   }
 
   function destroy(Request $request, User $user)

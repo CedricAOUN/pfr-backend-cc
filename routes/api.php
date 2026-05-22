@@ -6,6 +6,7 @@ Route::apiResource('courses', App\Http\Controllers\API\CourseController::class);
 
 Route::prefix('users')->group(function () {
   Route::get('/', [App\Http\Controllers\API\UserController::class, 'index'])->name('users.index');
+  Route::get('me', [App\Http\Controllers\API\UserController::class, 'me'])->middleware('auth:sanctum')->name('users.me');
   Route::get('{user}', [App\Http\Controllers\API\UserController::class, 'show'])->name('users.show');
   Route::put('edit/{user}', [App\Http\Controllers\API\UserController::class, 'updateInfo'])->middleware('auth:sanctum')->name('users.updateInfo');
   Route::delete('delete/{user}', [App\Http\Controllers\API\UserController::class, 'destroy'])->middleware('auth:sanctum')->name('users.destroy');
