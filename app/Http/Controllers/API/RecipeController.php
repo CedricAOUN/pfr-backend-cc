@@ -27,7 +27,12 @@ class RecipeController extends Controller
       });
     }
 
-    return RecipeResource::collection($query->get());
+    return [
+      'recipes' => RecipeResource::collection($query->get()),
+      'total' => $query->count(),
+      'highest_likes' => $query->orderByDesc('likes_count')->first()?->likes_count ?? 0,
+      'lowest_likes' => $query->orderBy('likes_count')->first()?->likes_count ?? 0,
+    ];
   }
 
   function show(Recipe $recipe)

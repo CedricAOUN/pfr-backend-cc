@@ -38,6 +38,7 @@ class UserController extends Controller
   {
     $validated = $request->validate(['name' => 'required|string|max:255', 'email' => 'required|string|email|max:255|unique:users', 'password' => 'required|string|min:8',]);
     $user = User::create(['name' => $validated['name'], 'email' => $validated['email'], 'password' => Hash::make($validated['password']),]);
+    $user->assignRole('regular_user');
     return new UserResource($user);
   }
   function login(Request $request)
@@ -117,6 +118,8 @@ class UserController extends Controller
     $user->is_premium = true;
     $user->premium_expire = $validated['premium_expire'];
     $user->save();
+    $user->removeRole('regular_user');
+    $user->assignRole('premium_user');
     return new UserResource($user);
   }
 
@@ -126,6 +129,8 @@ class UserController extends Controller
     $user->is_premium = false;
     $user->premium_expire = null;
     $user->save();
+    $user->removeRole('premium_user');
+    $user->assignRole('regular_user');
     return new UserResource($user);
   }
 }

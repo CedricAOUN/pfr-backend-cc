@@ -14,7 +14,21 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Admin/Expert user
+        // Admin user
+        User::create([
+            'name' => 'admin',
+            'email' => 'admin@example.com',
+            'password' => Hash::make('password'),
+            'is_premium' => true,
+            'is_expert' => true,
+            'premium_expire' => now()->addYear(),
+            'first_name' => 'Admin',
+            'last_name' => 'User',
+            'biography' => 'Administrateur du site.',
+            'avatar_url' => 'https://i.pravatar.cc/150?u=admin',
+        ]);
+
+        // Expert user
         User::create([
             'name' => 'chef_martin',
             'email' => 'martin@example.com',
