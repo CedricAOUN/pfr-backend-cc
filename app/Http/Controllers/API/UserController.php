@@ -107,30 +107,21 @@ class UserController extends Controller
     return new UserResource($user);
   }
 
-  function makePremium(Request $request, User $user)
+  function subscriptionStatus(Request $request, User $user)
   {
-    // Admin-only: premium is normally granted automatically via Stripe webhook.
-    // This endpoint exists for manual overrides (e.g. customer support).
-    Gate::authorize('is-admin');
-    $validated = $request->validate([
-      'premium_expire' => 'required|date|after:today',
-    ]);
-    $user->is_premium = true;
-    $user->premium_expire = $validated['premium_expire'];
-    $user->save();
-    $user->removeRole('regular_user');
-    $user->assignRole('premium_user');
-    return new UserResource($user);
-  }
+    $user = $request->user();
+    $subscription = $user->subscription('default');
 
-  function revokePremium(Request $request, User $user)
-  {
-    Gate::authorize('is-admin');
-    $user->is_premium = false;
-    $user->premium_expire = null;
-    $user->save();
-    $user->removeRole('premium_user');
-    $user->assignRole('regular_user');
-    return new UserResource($user);
+    return response()->json([
+      'is_subscribed' => $subscription && $subscription->valid(),
+      'subscription'   => $subscription ? [
+        'name'          => $subscription->name,
+        'stripe_status' => $subscription->stripe_status,
+        'stripe_price'  => $subscription->stripe_price,
+        'quantity'      => $subscription->quantity,
+        'trial_ends_at' => $subscription->trial_ends_at,
+        'ends_at'       => $subscription->ends_at,
+      ] : null,
+    ]);
   }
 }

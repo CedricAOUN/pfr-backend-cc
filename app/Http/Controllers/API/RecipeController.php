@@ -26,12 +26,32 @@ class RecipeController extends Controller
           });
       });
     }
+    if ($request->has('ingredients')) {
+      $ingredients = explode(',', $request->input('ingredients'));
+      $query->whereHas('ingredients', function ($ingredientQuery) use ($ingredients) {
+        $ingredientQuery->whereIn('name', $ingredients);
+      });
+    }
+
+    if ($request->has('creators')) {
+      $creators = explode(',', $request->input('creators'));
+      $query->whereHas('creator', function ($creatorQuery) use ($creators) {
+        $creatorQuery->whereIn('name', $creators);
+      });
+    }
+
+    if ($request->has('is_premium')) {
+      $isPremium = filter_var($request->input('is_premium'), FILTER_VALIDATE_BOOLEAN);
+      $query->where('is_premium', $isPremium);
+    }
 
     return [
       'recipes' => RecipeResource::collection($query->get()),
       'total' => $query->count(),
       'highest_likes' => $query->orderByDesc('likes_count')->first()?->likes_count ?? 0,
       'lowest_likes' => $query->orderBy('likes_count')->first()?->likes_count ?? 0,
+      'all_ingredients' => Recipe::with('ingredients')->get()->pluck('ingredients.*.name')->flatten()->unique()->values(),
+      'all_creators' => Recipe::with('creator')->get()->pluck('creator.name')->unique()->values(),
     ];
   }
 

@@ -6,8 +6,9 @@ use App\Http\Controllers\API\{
   UserController,
   RecipeController,
   LikeController,
-  StripeController
+  CheckoutController
 };
+use Laravel\Cashier\Http\Controllers\WebhookController;
 
 /*
 |--------------------------------------------------------------------------
@@ -47,6 +48,10 @@ Route::prefix('users')->group(function () {
   Route::post('logout', [UserController::class, 'logout'])
     ->middleware('auth:sanctum')
     ->name('logout');
+
+  Route::get('subscription/{user}', [UserController::class, 'subscriptionStatus'])
+    ->middleware('auth:sanctum')
+    ->name('users.subscription');
 });
 
 /*
@@ -121,9 +126,9 @@ Route::prefix('courses')->group(function () {
 | Stripe
 |--------------------------------------------------------------------------
 */
-Route::post('stripe/checkout', [StripeController::class, 'createCheckoutSession'])
-  ->middleware('auth:sanctum')
-  ->name('stripe.checkout');
-
-Route::post('stripe/webhook', [StripeController::class, 'handleWebhook'])
-  ->name('stripe.webhook'); // public, signature-verified — correct as-is
+Route::middleware('auth:sanctum')->group(function () {
+  Route::post('/checkout', [CheckoutController::class, 'create'])
+    ->name('stripe.createCheckoutSession');
+});
+Route::post('/stripe/webhook', [WebhookController::class, 'handleWebhook'])
+  ->name('cashier.webhook');
