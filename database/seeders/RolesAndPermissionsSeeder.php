@@ -36,14 +36,14 @@ class RolesAndPermissionsSeeder extends Seeder
         ];
 
         foreach ($permissions as $permission) {
-            Permission::firstOrCreate(['name' => $permission]);
+            Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'sanctum']);
         }
 
         // Create roles and assign permissions
-        $admin = Role::firstOrCreate(['name' => 'admin']);
+        $admin = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'sanctum']);
         $admin->givePermissionTo(Permission::all());
 
-        $regularUser = Role::firstOrCreate(['name' => 'regular_user']);
+        $regularUser = Role::firstOrCreate(['name' => 'regular_user', 'guard_name' => 'sanctum']);
         $regularUser->givePermissionTo([
             'users.view',
             'users.list',
@@ -55,7 +55,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'comments.create',
         ]);
 
-        $premiumUser = Role::firstOrCreate(['name' => 'premium_user']);
+        $premiumUser = Role::firstOrCreate(['name' => 'premium_user', 'guard_name' => 'sanctum']);
         $premiumUser->givePermissionTo([
             'users.view',
             'users.list',
@@ -68,7 +68,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'comments.create',
         ]);
 
-        $chef = Role::firstOrCreate(['name' => 'chef']);
+        $chef = Role::firstOrCreate(['name' => 'chef', 'guard_name' => 'sanctum']);
         $chef->givePermissionTo([
             'users.view',
             'users.list',
