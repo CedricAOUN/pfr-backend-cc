@@ -6,9 +6,9 @@ use App\Http\Controllers\API\{
   UserController,
   RecipeController,
   LikeController,
-  CheckoutController
+  CheckoutController,
+  StripeWebhookController
 };
-use Laravel\Cashier\Http\Controllers\WebhookController;
 
 /*
 |--------------------------------------------------------------------------
@@ -130,5 +130,5 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::post('/checkout', [CheckoutController::class, 'create'])
     ->name('stripe.createCheckoutSession');
 });
-Route::post('/stripe/webhook', [WebhookController::class, 'handleWebhook'])
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])
   ->name('cashier.webhook');

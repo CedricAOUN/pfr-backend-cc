@@ -115,12 +115,13 @@ class UserController extends Controller
     return response()->json([
       'is_subscribed' => $subscription && $subscription->valid(),
       'subscription'   => $subscription ? [
-        'name'          => $subscription->name,
+        'type'          => $subscription->type,
         'stripe_status' => $subscription->stripe_status,
         'stripe_price'  => $subscription->stripe_price,
         'quantity'      => $subscription->quantity,
         'trial_ends_at' => $subscription->trial_ends_at,
         'ends_at'       => $subscription->ends_at,
+        'current_period_end' => $subscription->current_period_end,
       ] : null,
     ]);
   }
