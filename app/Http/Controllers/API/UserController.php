@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
@@ -60,19 +59,20 @@ class UserController extends Controller
 
   function me(Request $request)
   {
+    if (!$request->user()) {
+      return response()->json(['message' => 'Not authenticated'], 401);
+    }
     return new UserResource($request->user()->load('favorites'));
   }
 
   function destroy(Request $request, User $user)
   {
-    Gate::authorize('modify-user', $user);
     $user->delete();
     return response()->noContent();
   }
 
   function updateInfo(Request $request, User $user)
   {
-    Gate::authorize('modify-user', $user);
     $validated = $request->validate([
       'name'       => 'sometimes|required|string|max:255',
       'first_name' => 'sometimes|nullable|string|max:255',
@@ -95,7 +95,6 @@ class UserController extends Controller
   }
   function updateCredentials(Request $request, User $user)
   {
-    Gate::authorize('modify-user', $user);
     $validated = $request->validate(['email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $user->id, 'password' => 'sometimes|required|string|min:8',]);
     if (isset($validated['email'])) {
       $user->email = $validated['email'];

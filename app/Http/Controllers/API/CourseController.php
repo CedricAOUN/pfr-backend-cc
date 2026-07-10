@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\CourseResource;
 use App\Models\Course;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 
 class CourseController extends Controller
@@ -33,8 +32,6 @@ class CourseController extends Controller
 
   function store(Request $request)
   {
-    Gate::authorize('is-expert');
-
     $validated = $request->validate([
       'title'      => 'required|string|max:255',
       'description' => 'required|string',
@@ -60,8 +57,6 @@ class CourseController extends Controller
 
   function update(Request $request, Course $course)
   {
-    Gate::authorize('modify-course', $course);
-
     $validated = $request->validate([
       'title'       => 'sometimes|required|string|max:255',
       'description' => 'sometimes|required|string',
@@ -94,7 +89,6 @@ class CourseController extends Controller
 
   function destroy(Request $request, Course $course)
   {
-    Gate::authorize('modify-course', $course);
     // Delete video file if exists
     if ($course->video_path && Storage::disk('local')->exists($course->video_path)) {
       Storage::disk('local')->delete($course->video_path);
@@ -105,8 +99,6 @@ class CourseController extends Controller
 
   function streamVideo(Request $request, Course $course)
   {
-    Gate::authorize('is-premium');
-
     if (!$course->video_path || !Storage::disk('local')->exists($course->video_path)) {
       return response()->json(['message' => 'Video not found.'], 404);
     }

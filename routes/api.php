@@ -65,9 +65,6 @@ Route::prefix('recipes')->group(function () {
   Route::get('/', [RecipeController::class, 'index'])->name('recipes.index');
 
   Route::get('{recipe}', [RecipeController::class, 'show'])
-    ->middleware(['auth:sanctum', 'permission:recipes.view'])
-    // premium-recipes.view checked inside the Resource, since regular_user
-    // can view non-premium recipes but not premium ones
     ->name('recipes.show');
 
   Route::post('create', [RecipeController::class, 'store'])
@@ -130,5 +127,12 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::post('/checkout', [CheckoutController::class, 'create'])
     ->name('stripe.createCheckoutSession');
 });
+
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])
   ->name('cashier.webhook');
+
+Route::post('/stripe/plan-details', [CheckoutController::class, 'planDetails'])
+  ->name('stripe.planDetails');
+
+Route::get('/stripe/order-details/{sessionId}', [CheckoutController::class, 'orderDetails'])
+  ->name('stripe.orderDetails');

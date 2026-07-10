@@ -18,7 +18,7 @@ class CheckoutController extends Controller
 
     $validated = $request->validate([
       'product'  => ['required', Rule::in(['premium', 'chef'])],
-      'interval' => ['required', Rule::in(['monthly', '6_month', 'annual'])],
+      'interval' => ['required', Rule::in(['monthly', '6_months', 'annual'])],
     ]);
 
     $priceId = config("plans.{$validated['product']}.{$validated['interval']}");
@@ -37,5 +37,36 @@ class CheckoutController extends Controller
     return response()->json([
       'checkout_url' => $checkoutSession->url,
     ]);
+  }
+
+  function orderDetails(string $sessionId)
+  {
+    $validated = ['session_id' => $sessionId];
+
+    $validated = validator($validated, [
+      'session_id' => ['required', 'string'],
+    ])->validate();
+
+    if (!$validated['session_id']) {
+      abort(422, 'Invalid session ID.');
+    }
+
+    $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET'));
+    $session = $stripe->checkout->sessions->retrieve($validated['session_id'], []);
+    return $session;
+  }
+
+  function planDetails(Request $request)
+  {
+    $validated = $request->validate([
+      'plan_id' => ['required', 'string'],
+    ]);
+    if (!$validated['plan_id']) {
+      abort(422, 'Invalid plan selection.');
+    }
+
+    $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET'));
+    $plan = $stripe->plans->retrieve($validated['plan_id'], []);
+    return $plan;
   }
 }

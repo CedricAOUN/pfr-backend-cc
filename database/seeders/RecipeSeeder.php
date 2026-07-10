@@ -26,13 +26,15 @@ class RecipeSeeder extends Seeder
             'image_url' => 'https://images.unsplash.com/photo-1568571780765-9276ac8b75a2?w=800',
         ]);
 
-        foreach ([
-            ['name' => 'Pâte brisée', 'quantity' => 1, 'unit' => 'pâte'],
-            ['name' => 'Pommes', 'quantity' => 5, 'unit' => 'pièces'],
-            ['name' => 'Sucre', 'quantity' => 50, 'unit' => 'g'],
-            ['name' => 'Cannelle', 'quantity' => 1, 'unit' => 'c. à café'],
-            ['name' => 'Beurre', 'quantity' => 30, 'unit' => 'g']
-        ] as $ing) {
+        foreach (
+            [
+                ['name' => 'Pâte brisée', 'quantity' => 1, 'unit' => 'pâte'],
+                ['name' => 'Pommes', 'quantity' => 5, 'unit' => 'pièces'],
+                ['name' => 'Sucre', 'quantity' => 50, 'unit' => 'g'],
+                ['name' => 'Cannelle', 'quantity' => 1, 'unit' => 'c. à café'],
+                ['name' => 'Beurre', 'quantity' => 30, 'unit' => 'g']
+            ] as $ing
+        ) {
             Ingredient::create(array_merge($ing, ['recipe_id' => $recipe1->id]));
         }
 
@@ -45,16 +47,18 @@ class RecipeSeeder extends Seeder
             'image_url' => 'https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=800',
         ]);
 
-        foreach ([
-            ['name' => 'Riz arborio', 'quantity' => 300, 'unit' => 'g'],
-            ['name' => 'Champignons de Paris', 'quantity' => 200, 'unit' => 'g'],
-            ['name' => 'Cèpes séchés', 'quantity' => 20, 'unit' => 'g'],
-            ['name' => 'Oignon', 'quantity' => 1, 'unit' => 'pièce'],
-            ['name' => 'Bouillon de légumes', 'quantity' => 1, 'unit' => 'L'],
-            ['name' => 'Vin blanc', 'quantity' => 100, 'unit' => 'ml'],
-            ['name' => 'Parmesan râpé', 'quantity' => 50, 'unit' => 'g'],
-            ['name' => 'Beurre', 'quantity' => 30, 'unit' => 'g']
-        ] as $ing) {
+        foreach (
+            [
+                ['name' => 'Riz arborio', 'quantity' => 300, 'unit' => 'g'],
+                ['name' => 'Champignons de Paris', 'quantity' => 200, 'unit' => 'g'],
+                ['name' => 'Cèpes séchés', 'quantity' => 20, 'unit' => 'g'],
+                ['name' => 'Oignon', 'quantity' => 1, 'unit' => 'pièce'],
+                ['name' => 'Bouillon de légumes', 'quantity' => 1, 'unit' => 'L'],
+                ['name' => 'Vin blanc', 'quantity' => 100, 'unit' => 'ml'],
+                ['name' => 'Parmesan râpé', 'quantity' => 50, 'unit' => 'g'],
+                ['name' => 'Beurre', 'quantity' => 30, 'unit' => 'g']
+            ] as $ing
+        ) {
             Ingredient::create(array_merge($ing, ['recipe_id' => $recipe2->id]));
         }
 
@@ -67,16 +71,18 @@ class RecipeSeeder extends Seeder
             'image_url' => 'https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=800',
         ]);
 
-        foreach ([
-            ['name' => 'Poulet entier', 'quantity' => 1, 'unit' => 'pièce'],
-            ['name' => 'Beurre', 'quantity' => 50, 'unit' => 'g'],
-            ['name' => 'Thym', 'quantity' => 2, 'unit' => 'brins'],
-            ['name' => 'Romarin', 'quantity' => 2, 'unit' => 'brins'],
-            ['name' => 'Citron', 'quantity' => 1, 'unit' => 'pièce'],
-            ['name' => 'Ail', 'quantity' => 4, 'unit' => 'gousses'],
-            ['name' => 'Sel', 'quantity' => 1, 'unit' => 'c. à café'],
-            ['name' => 'Poivre', 'quantity' => 0.5, 'unit' => 'c. à café']
-        ] as $ing) {
+        foreach (
+            [
+                ['name' => 'Poulet entier', 'quantity' => 1, 'unit' => 'pièce'],
+                ['name' => 'Beurre', 'quantity' => 50, 'unit' => 'g'],
+                ['name' => 'Thym', 'quantity' => 2, 'unit' => 'brins'],
+                ['name' => 'Romarin', 'quantity' => 2, 'unit' => 'brins'],
+                ['name' => 'Citron', 'quantity' => 1, 'unit' => 'pièce'],
+                ['name' => 'Ail', 'quantity' => 4, 'unit' => 'gousses'],
+                ['name' => 'Sel', 'quantity' => 1, 'unit' => 'c. à café'],
+                ['name' => 'Poivre', 'quantity' => 0.5, 'unit' => 'c. à café']
+            ] as $ing
+        ) {
             Ingredient::create(array_merge($ing, ['recipe_id' => $recipe3->id]));
         }
 
@@ -89,15 +95,17 @@ class RecipeSeeder extends Seeder
             'image_url' => 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=800',
         ]);
 
-        foreach ([
-            ['name' => 'Carottes', 'quantity' => 3, 'unit' => 'pièces'],
-            ['name' => 'Pomme de terre', 'quantity' => 2, 'unit' => 'pièces'],
-            ['name' => 'Poireau', 'quantity' => 1, 'unit' => 'pièce'],
-            ['name' => 'Oignon', 'quantity' => 1, 'unit' => 'pièce'],
-            ['name' => 'Bouillon de légumes', 'quantity' => 1, 'unit' => 'L'],
-            ['name' => 'Sel', 'quantity' => 1, 'unit' => 'c. à café'],
-            ['name' => 'Poivre', 'quantity' => 0.5, 'unit' => 'c. à café']
-        ] as $ing) {
+        foreach (
+            [
+                ['name' => 'Carottes', 'quantity' => 3, 'unit' => 'pièces'],
+                ['name' => 'Pomme de terre', 'quantity' => 2, 'unit' => 'pièces'],
+                ['name' => 'Poireau', 'quantity' => 1, 'unit' => 'pièce'],
+                ['name' => 'Oignon', 'quantity' => 1, 'unit' => 'pièce'],
+                ['name' => 'Bouillon de légumes', 'quantity' => 1, 'unit' => 'L'],
+                ['name' => 'Sel', 'quantity' => 1, 'unit' => 'c. à café'],
+                ['name' => 'Poivre', 'quantity' => 0.5, 'unit' => 'c. à café']
+            ] as $ing
+        ) {
             Ingredient::create(array_merge($ing, ['recipe_id' => $recipe4->id]));
         }
 
@@ -110,12 +118,14 @@ class RecipeSeeder extends Seeder
             'image_url' => 'https://images.unsplash.com/photo-1470124182917-cc6e71b22ecc?w=800',
         ]);
 
-        foreach ([
-            ['name' => 'Crème liquide', 'quantity' => 500, 'unit' => 'ml'],
-            ['name' => 'Jaunes d\'œufs', 'quantity' => 6, 'unit' => 'pièces'],
-            ['name' => 'Sucre', 'quantity' => 100, 'unit' => 'g'],
-            ['name' => 'Gousses de vanille', 'quantity' => 2, 'unit' => 'pièces']
-        ] as $ing) {
+        foreach (
+            [
+                ['name' => 'Crème liquide', 'quantity' => 500, 'unit' => 'ml'],
+                ['name' => 'Jaunes d\'œufs', 'quantity' => 6, 'unit' => 'pièces'],
+                ['name' => 'Sucre', 'quantity' => 100, 'unit' => 'g'],
+                ['name' => 'Gousses de vanille', 'quantity' => 2, 'unit' => 'pièces']
+            ] as $ing
+        ) {
             Ingredient::create(array_merge($ing, ['recipe_id' => $recipe5->id]));
         }
 
@@ -123,22 +133,24 @@ class RecipeSeeder extends Seeder
             'title' => 'Salade César maison',
             'description' => 'La célèbre salade avec sa sauce crémeuse et ses croûtons croustillants.',
             'instructions' => 'Préparer les croûtons dorés à l\'ail. Griller le poulet. Préparer la sauce: mixer jaune d\'œuf, ail, anchois, citron, puis émulsionner avec l\'huile. Mélanger la salade avec la sauce, ajouter poulet, croûtons et copeaux de parmesan.',
-            'is_premium' => false,
+            'is_premium' => true,
             'creator_id' => $users->where('name', 'marie_foodie')->first()->id,
             'image_url' => 'https://images.unsplash.com/photo-1550304943-4f24f54ddde9?w=800',
         ]);
 
-        foreach ([
-            ['name' => 'Laitue romaine', 'quantity' => 1, 'unit' => 'pièce'],
-            ['name' => 'Poulet grillé', 'quantity' => 200, 'unit' => 'g'],
-            ['name' => 'Croûtons à l\'ail', 'quantity' => 50, 'unit' => 'g'],
-            ['name' => 'Parmesan en copeaux', 'quantity' => 30, 'unit' => 'g'],
-            ['name' => 'Jaune d\'œuf', 'quantity' => 1, 'unit' => 'pièce'],
-            ['name' => 'Ail', 'quantity' => 1, 'unit' => 'gousse'],
-            ['name' => 'Anchois', 'quantity' => 2, 'unit' => 'filets'],
-            ['name' => 'Citron', 'quantity' => 0.5, 'unit' => 'pièce'],
-            ['name' => 'Huile d\'olive', 'quantity' => 100, 'unit' => 'ml']
-        ] as $ing) {
+        foreach (
+            [
+                ['name' => 'Laitue romaine', 'quantity' => 1, 'unit' => 'pièce'],
+                ['name' => 'Poulet grillé', 'quantity' => 200, 'unit' => 'g'],
+                ['name' => 'Croûtons à l\'ail', 'quantity' => 50, 'unit' => 'g'],
+                ['name' => 'Parmesan en copeaux', 'quantity' => 30, 'unit' => 'g'],
+                ['name' => 'Jaune d\'œuf', 'quantity' => 1, 'unit' => 'pièce'],
+                ['name' => 'Ail', 'quantity' => 1, 'unit' => 'gousse'],
+                ['name' => 'Anchois', 'quantity' => 2, 'unit' => 'filets'],
+                ['name' => 'Citron', 'quantity' => 0.5, 'unit' => 'pièce'],
+                ['name' => 'Huile d\'olive', 'quantity' => 100, 'unit' => 'ml']
+            ] as $ing
+        ) {
             Ingredient::create(array_merge($ing, ['recipe_id' => $recipe6->id]));
         }
     }

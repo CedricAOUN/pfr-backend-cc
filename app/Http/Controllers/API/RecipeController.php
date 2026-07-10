@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\RecipeResource;
 use App\Models\Recipe;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 
 class RecipeController extends Controller
 {
@@ -57,15 +56,20 @@ class RecipeController extends Controller
 
   function show(Recipe $recipe)
   {
-    if ($recipe->is_premium) {
-      Gate::authorize('is-premium');
+    /** @var \App\Models\User $user */
+    $user = auth()->guard()->user();
+    $userHasPermission = $user && $user->hasPermissionTo('premium-recipes.view');
+    if ($recipe->is_premium && !$userHasPermission) {
+      return response()->json(['message' => 'You do not have permission to view this premium recipe.'], 403);
     }
     return new RecipeResource($recipe->load(['creator', 'comments.creator', 'likes', 'favorites', 'ingredients'])->loadCount(['likes', 'favorites']));
   }
 
   function store(Request $request)
   {
-    Gate::authorize('is-premium');
+    /** @var \App\Models\User $user */
+    $user = auth()->guard()->user();
+
     $validated = $request->validate([
       'title' => 'required|string|max:255',
       'description' => 'required|string',
@@ -76,6 +80,10 @@ class RecipeController extends Controller
       'instructions' => 'required|string',
       'is_premium' => 'boolean',
     ]);
+    if ($validated['is_premium'] && !$user->hasPermissionTo('premium-recipes.create')) {
+      return response()->json(['message' => 'You do not have permission to create premium recipes.'], 403);
+    }
+
     $recipe = Recipe::create(array_merge($validated, ['creator_id' => $request->user()->id]));
     foreach ($validated['ingredients'] as $ingredient) {
       $recipe->ingredients()->create($ingredient);
@@ -85,7 +93,6 @@ class RecipeController extends Controller
 
   function update(Request $request, Recipe $recipe)
   {
-    Gate::authorize('modify-recipe', $recipe);
     $validated = $request->validate([
       'title' => 'string|max:255',
       'description' => 'string',
@@ -108,7 +115,6 @@ class RecipeController extends Controller
 
   function destroy(Request $request, Recipe $recipe)
   {
-    Gate::authorize('modify-recipe', $recipe);
     $recipe->delete();
     return response()->noContent();
   }
