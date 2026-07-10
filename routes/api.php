@@ -7,6 +7,7 @@ use App\Http\Controllers\API\{
   RecipeController,
   LikeController,
   CheckoutController,
+  FavoriteController,
   StripeWebhookController
 };
 
@@ -82,6 +83,10 @@ Route::prefix('recipes')->group(function () {
   Route::post('{recipe}/like', [LikeController::class, 'toggleLike'])
     ->middleware(['auth:sanctum', 'permission:likes.update'])
     ->name('recipes.toggleLike');
+
+  Route::post('{recipe}/favorite', [FavoriteController::class, 'toggleFavorite'])
+    ->middleware(['auth:sanctum', 'permission:likes.update'])
+    ->name('recipes.toggleFavorite');
 });
 
 /*

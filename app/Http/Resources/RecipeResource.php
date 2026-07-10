@@ -14,9 +14,13 @@ class RecipeResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $user = $request->user();
+        $user = $request->user('sanctum');
         $isLikedByCurrentUser = $user && $this->relationLoaded('likes')
             ? $this->likes->contains('user_id', $user->id)
+            : false;
+
+        $isFavoritedByCurrentUser = $user && $this->relationLoaded('favorites')
+            ? $this->favorites->contains('user_id', $user->id)
             : false;
 
         $creator = collect($this->creator)->only(['id', 'name', 'first_name', 'last_name', 'avatar_url']);
@@ -32,11 +36,13 @@ class RecipeResource extends JsonResource
             'creator' => $creator,
             'comments' => CommentResource::collection($this->whenLoaded('comments')),
             'likes' => [
-                "count" => $this->whenCounted('likes'),
-                "is_logged_in_user" => $user !== null,
-                "is_liked_by_current_user" => $isLikedByCurrentUser,
+                'count' => $this->whenCounted('likes'),
+                'is_liked_by_user' => $isLikedByCurrentUser,
             ],
-            'favorites_count' => $this->whenCounted('favorites'),
+            'favorites' => [
+                'count' => $this->whenCounted('favorites'),
+                'is_favorited_by_user' => $isFavoritedByCurrentUser,
+            ],
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

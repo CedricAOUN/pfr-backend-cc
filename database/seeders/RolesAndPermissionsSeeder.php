@@ -51,7 +51,6 @@ class RolesAndPermissionsSeeder extends Seeder
             'courses.list',
             'recipes.view',
             'recipes.list',
-            'likes.update',
             'comments.create',
         ]);
 

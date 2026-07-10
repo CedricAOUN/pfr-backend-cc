@@ -39,9 +39,17 @@ class RecipeController extends Controller
       });
     }
 
-    if ($request->has('is_premium')) {
-      $isPremium = filter_var($request->input('is_premium'), FILTER_VALIDATE_BOOLEAN);
-      $query->where('is_premium', $isPremium);
+    if ($request->has('recipeType')) {
+      switch ($request->input('recipeType')) {
+        case 'all':
+          break;
+        case 'premium':
+          $query->where('is_premium', true);
+          break;
+        case 'free':
+          $query->where('is_premium', false);
+          break;
+      }
     }
 
     return [
@@ -117,5 +125,29 @@ class RecipeController extends Controller
   {
     $recipe->delete();
     return response()->noContent();
+  }
+
+  function toggleLike(Request $request, Recipe $recipe)
+  {
+    $user = auth('sanctum')->user();
+    if ($recipe->likes()->where('user_id', $user->id)->exists()) {
+      $recipe->likes()->detach($user->id);
+      return response()->json(['message' => 'Recipe unliked.']);
+    } else {
+      $recipe->likes()->attach($user->id);
+      return response()->json(['message' => 'Recipe liked.']);
+    }
+  }
+
+  function toggleFavorite(Request $request, Recipe $recipe)
+  {
+    $user = auth('sanctum')->user();
+    if ($recipe->favorites()->where('user_id', $user->id)->exists()) {
+      $recipe->favorites()->detach($user->id);
+      return response()->json(['message' => 'Recipe removed from favorites.']);
+    } else {
+      $recipe->favorites()->attach($user->id);
+      return response()->json(['message' => 'Recipe added to favorites.']);
+    }
   }
 }
