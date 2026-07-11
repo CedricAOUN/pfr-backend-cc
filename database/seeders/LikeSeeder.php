@@ -16,11 +16,23 @@ class LikeSeeder extends Seeder
     public function run(): void
     {
         $recipes = Recipe::all();
+        $users = User::all();
 
         foreach ($recipes as $recipe) {
             Like::create([
                 'user_id' => 1,
                 'recipe_id' => $recipe->id,
+            ]);
+        }
+
+        foreach ($users as $user) {
+            $existingLike = Like::where('user_id', $user->id)->where('recipe_id', 1)->first();
+            if ($existingLike) {
+                continue;
+            }
+            Like::create([
+                'user_id' => $user->id,
+                'recipe_id' => 1,
             ]);
         }
     }

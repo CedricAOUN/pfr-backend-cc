@@ -52,11 +52,13 @@ class RecipeController extends Controller
       }
     }
 
+    $recipes = $query->get();
+
     return [
-      'recipes' => RecipeResource::collection($query->get()),
-      'total' => $query->count(),
-      'highest_likes' => $query->orderByDesc('likes_count')->first()?->likes_count ?? 0,
-      'lowest_likes' => $query->orderBy('likes_count')->first()?->likes_count ?? 0,
+      'recipes' => RecipeResource::collection($recipes),
+      'total' => $recipes->count(),
+      'highest_likes' => $recipes->max('likes_count') ?? 0,
+      'lowest_likes' => $recipes->min('likes_count') ?? 0,
       'all_ingredients' => Recipe::with('ingredients')->get()->pluck('ingredients.*.name')->flatten()->unique()->values(),
       'all_creators' => Recipe::with('creator')->get()->pluck('creator.name')->unique()->values(),
     ];
