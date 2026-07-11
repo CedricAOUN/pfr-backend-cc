@@ -75,9 +75,8 @@ class RecipeController extends Controller
 
   function show(Recipe $recipe)
   {
-    /** @var \App\Models\User $user */
-    $user = auth()->guard()->user();
-    $userHasPermission = $user && $user->hasPermissionTo('premium-recipes.view');
+    $user = auth('sanctum')->user();
+    $userHasPermission = $user instanceof User && $user->hasPermissionTo('premium-recipes.view');
     if ($recipe->is_premium && !$userHasPermission) {
       return response()->json(['message' => 'You do not have permission to view this premium recipe.'], 403);
     }
@@ -86,8 +85,7 @@ class RecipeController extends Controller
 
   function store(Request $request)
   {
-    /** @var \App\Models\User $user */
-    $user = auth()->guard()->user();
+    $user = auth('sanctum')->user();
 
     $validated = $request->validate([
       'title' => 'required|string|max:255',
@@ -99,7 +97,7 @@ class RecipeController extends Controller
       'instructions' => 'required|string',
       'is_premium' => 'boolean',
     ]);
-    if ($validated['is_premium'] && !$user->hasPermissionTo('premium-recipes.create')) {
+    if ($validated['is_premium'] && $user instanceof User && !$user->hasPermissionTo('premium-recipes.create')) {
       return response()->json(['message' => 'You do not have permission to create premium recipes.'], 403);
     }
 

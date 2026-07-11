@@ -99,17 +99,9 @@ class RolesAndPermissionsSeeder extends Seeder
         ]);
 
         // Assign some roles for testing.
-        $allUsers = \App\Models\User::all();
-        foreach ($allUsers as $user) {
-            if ($user->email === 'admin@example.com') {
-                $user->assignRole($admin);
-            } elseif ($user->is_expert) {
-                $user->assignRole($chef);
-            } elseif ($user->is_premium) {
-                $user->assignRole($premiumUser);
-            } else {
-                $user->assignRole($regularUser);
-            }
+        $adminUser = \App\Models\User::where('email', 'admin@example.com')->first();
+        if ($adminUser) {
+            $adminUser->assignRole($admin);
         }
     }
 }

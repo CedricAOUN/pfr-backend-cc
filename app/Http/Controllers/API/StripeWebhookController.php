@@ -2,12 +2,26 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Http\Resources\UserResource;
+use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Laravel\Cashier\Http\Controllers\WebhookController as CashierController;
 
 class StripeWebhookController extends CashierController
 {
+  /**
+   * Map of Stripe product ID (config key) => role name.
+   * Add new plans here only — no other code needs to change.
+   */
+  protected function roleMap(): array
+  {
+    return [
+      config('plans.premium.product') => 'premium_user',
+      config('plans.chef.product') => 'chef',
+    ];
+  }
+
   protected function updatePeriodEnd(array $data): void
   {
     $stripeId = $data['id'] ?? null;
@@ -24,21 +38,100 @@ class StripeWebhookController extends CashierController
     ])->save();
   }
 
+  /**
+   * Grants the role matching the subscription's product and revokes
+   * the others. Called on both `created` and `updated` so plan
+   * swaps (which fire `updated`, not delete+create) are handled.
+   */
+  protected function syncRoleForSubscription(array $data): void
+  {
+    $user = $this->getUserByStripeId($data['customer'] ?? null);
+
+    if (!$user) {
+      Log::warning('Stripe webhook: no user found for customer', [
+        'customer' => $data['customer'] ?? null,
+      ]);
+      return;
+    }
+
+    // Don't grant access for subscriptions that aren't actually paid/active yet
+    // (e.g. incomplete, past_due, unpaid).
+    if (!in_array($data['status'] ?? null, ['active', 'trialing'], true)) {
+      return;
+    }
+
+    $productId = $data['items']['data'][0]['price']['product'] ?? null;
+
+    foreach ($this->roleMap() as $product => $role) {
+      if ($productId === $product) {
+        $this->assignRoleToUser($user, $role);
+      } else {
+        $this->revokeRoleFromUser($user, $role);
+      }
+    }
+  }
+
+  protected function assignRoleToUser(?User $user, string $roleName): void
+  {
+    if ($user && !$user->hasRole($roleName)) {
+      $user->assignRole($roleName);
+    }
+  }
+
+  protected function revokeRoleFromUser(?User $user, string $roleName): void
+  {
+    if ($user && $user->hasRole($roleName)) {
+      $user->removeRole($roleName);
+    }
+  }
+
   public function handleCustomerSubscriptionUpdated(array $payload)
   {
-    Log::info('StripeWebhookController: subscription.updated fired', [
-      'object' => $payload['data']['object'],
-    ]);
-
     $response = parent::handleCustomerSubscriptionUpdated($payload);
-    $this->updatePeriodEnd($payload['data']['object']);
+    $data = $payload['data']['object'];
+    $this->updatePeriodEnd($data);
+    $this->syncRoleForSubscription($data);
     return $response;
   }
 
   public function handleCustomerSubscriptionCreated(array $payload)
   {
     $response = parent::handleCustomerSubscriptionCreated($payload);
-    $this->updatePeriodEnd($payload['data']['object']);
+    $data = $payload['data']['object'];
+    $this->updatePeriodEnd($data);
+    $this->syncRoleForSubscription($data);
+    return $response;
+  }
+
+  public function handleCustomerSubscriptionDeleted(array $payload)
+  {
+    $response = parent::handleCustomerSubscriptionDeleted($payload);
+    $data = $payload['data']['object'];
+    $this->updatePeriodEnd($data);
+
+    $user = $this->getUserByStripeId($data['customer'] ?? null);
+
+    if (!$user) {
+      Log::warning('Stripe webhook: no user found for customer on deletion', [
+        'customer' => $data['customer'] ?? null,
+      ]);
+      return $response;
+    }
+
+    // Only downgrade if this was their last active subscription —
+    // don't strip access if they hold another active plan.
+    $hasOtherActiveSubscription = $user->subscriptions()
+      ->where('stripe_id', '!=', $data['id'] ?? null)
+      ->active()
+      ->exists();
+
+    if (!$hasOtherActiveSubscription) {
+      foreach (array_values($this->roleMap()) as $role) {
+        $this->revokeRoleFromUser($user, $role);
+      }
+      $this->assignRoleToUser($user, 'regular_user');
+    }
+
     return $response;
   }
 }
