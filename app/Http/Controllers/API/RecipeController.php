@@ -4,7 +4,9 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\RecipeResource;
+use App\Models\Ingredient;
 use App\Models\Recipe;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class RecipeController extends Controller
@@ -25,6 +27,7 @@ class RecipeController extends Controller
           });
       });
     }
+
     if ($request->has('ingredients')) {
       $ingredients = explode(',', $request->input('ingredients'));
       $query->whereHas('ingredients', function ($ingredientQuery) use ($ingredients) {
@@ -54,13 +57,19 @@ class RecipeController extends Controller
 
     $recipes = $query->get();
 
+    // Global min/max across ALL recipes, independent of filters
+    $likesCounts = Recipe::withCount('likes')->pluck('likes_count');
+
     return [
       'recipes' => RecipeResource::collection($recipes),
       'total' => $recipes->count(),
-      'highest_likes' => $recipes->max('likes_count') ?? 0,
-      'lowest_likes' => $recipes->min('likes_count') ?? 0,
-      'all_ingredients' => Recipe::with('ingredients')->get()->pluck('ingredients.*.name')->flatten()->unique()->values(),
-      'all_creators' => Recipe::with('creator')->get()->pluck('creator.name')->unique()->values(),
+      'highest_likes' => $likesCounts->max() ?? 0,
+      'lowest_likes' => $likesCounts->min() ?? 0,
+      'all_ingredients' => Ingredient::query()->distinct()->orderBy('name')->pluck('name'),
+      'all_creators' => User::query()
+        ->whereIn('id', Recipe::query()->select('creator_id')->distinct())
+        ->orderBy('name')
+        ->pluck('name'),
     ];
   }
 
