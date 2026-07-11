@@ -27,10 +27,6 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'is_premium',
-        'is_expert',
-        'is_admin',
-        'premium_expire',
         'first_name',
         'last_name',
         'biography',
@@ -62,10 +58,6 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'is_premium' => 'boolean',
-            'is_expert' => 'boolean',
-            'is_admin' => 'boolean',
-            'premium_expire' => 'datetime',
         ];
     }
 }

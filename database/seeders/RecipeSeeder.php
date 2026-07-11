@@ -22,7 +22,7 @@ class RecipeSeeder extends Seeder
             'description' => 'Une délicieuse tarte aux pommes à l\'ancienne, parfaite pour le dessert.',
             'instructions' => 'Préchauffer le four à 180°C. Éplucher et couper les pommes en fines tranches. Disposer la pâte dans un moule, piquer le fond. Disposer les pommes en rosace. Saupoudrer de sucre et de cannelle. Parsemer de noisettes de beurre. Enfourner 35 minutes.',
             'is_premium' => false,
-            'creator_id' => $users->where('is_expert', true)->first()->id,
+            'creator_id' => $users->where('id', 1)->first()->id,
             'image_url' => 'https://images.unsplash.com/photo-1568571780765-9276ac8b75a2?w=800',
         ]);
 
@@ -43,7 +43,7 @@ class RecipeSeeder extends Seeder
             'description' => 'Un risotto crémeux aux champignons de Paris et cèpes séchés.',
             'instructions' => 'Réhydrater les cèpes. Faire revenir l\'oignon dans le beurre. Ajouter le riz et nacrer. Déglacer au vin blanc. Ajouter le bouillon louche par louche en remuant. À mi-cuisson, ajouter les champignons. Finir avec le parmesan et une noix de beurre.',
             'is_premium' => true,
-            'creator_id' => $users->where('is_expert', true)->first()->id,
+            'creator_id' => $users->where('id', 2)->first()->id,
             'image_url' => 'https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=800',
         ]);
 
@@ -67,7 +67,7 @@ class RecipeSeeder extends Seeder
             'description' => 'Un classique indémodable, le poulet rôti parfaitement doré et parfumé.',
             'instructions' => 'Préchauffer le four à 200°C. Préparer un beurre aux herbes. Glisser le beurre sous la peau du poulet. Mettre le citron et l\'ail dans la cavité. Saler, poivrer. Enfourner 1h15 en arrosant régulièrement.',
             'is_premium' => false,
-            'creator_id' => $users->where('name', 'chef_sophie')->first()->id,
+            'creator_id' => $users->where('id', 1)->first()->id,
             'image_url' => 'https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=800',
         ]);
 
@@ -114,7 +114,7 @@ class RecipeSeeder extends Seeder
             'description' => 'Le dessert français par excellence, crémeux avec une croûte caramélisée.',
             'instructions' => 'Chauffer la crème avec la vanille fendue. Fouetter les jaunes avec le sucre. Verser la crème chaude sur les jaunes en fouettant. Répartir dans des ramequins. Cuire au bain-marie à 150°C pendant 45 min. Réfrigérer. Saupoudrer de sucre et caraméliser au chalumeau.',
             'is_premium' => true,
-            'creator_id' => $users->where('is_expert', true)->first()->id,
+            'creator_id' => $users->where('id', 3)->first()->id,
             'image_url' => 'https://images.unsplash.com/photo-1470124182917-cc6e71b22ecc?w=800',
         ]);
 

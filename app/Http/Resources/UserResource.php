@@ -29,6 +29,16 @@ class UserResource extends JsonResource
             ];
         }
 
+        $isChef = $this->subscriptions()
+            ->whereIn('stripe_status', ['active', 'trialing'])
+            ->whereHas('items', function ($query) {
+                $query->where(
+                    'stripe_product',
+                    config('plans.chef.product')
+                );
+            })
+            ->exists();
+
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -39,9 +49,9 @@ class UserResource extends JsonResource
             'avatar_url' => $this->avatar_url
                 ? (str_starts_with($this->avatar_url, 'http') ? $this->avatar_url : asset($this->avatar_url))
                 : null,
-            'is_premium' => $this->is_premium,
-            'is_expert' => $this->is_expert,
-            'premium_expire' => $this->premium_expire,
+            'is_premium' => $this->subscription('default')?->active() ?? false,
+            'is_chef' => $isChef,
+            'premium_expire' => $this->subscription('default')?->current_period_end,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'favorite_recipes' => $this->whenLoaded('favorites', fn() => $favoriteRecipeCards),
