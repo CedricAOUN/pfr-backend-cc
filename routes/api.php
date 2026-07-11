@@ -7,6 +7,7 @@ use App\Http\Controllers\API\{
   RecipeController,
   LikeController,
   CheckoutController,
+  CommentController,
   FavoriteController,
   StripeWebhookController
 };
@@ -85,8 +86,27 @@ Route::prefix('recipes')->group(function () {
     ->name('recipes.toggleLike');
 
   Route::post('{recipe}/favorite', [FavoriteController::class, 'toggleFavorite'])
-    ->middleware(['auth:sanctum', 'permission:likes.update'])
+    ->middleware(['auth:sanctum', 'permission:favorites.update'])
     ->name('recipes.toggleFavorite');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Comments
+|--------------------------------------------------------------------------
+*/
+Route::prefix('comments')->group(function () {
+  Route::post('create', [CommentController::class, 'store'])
+    ->middleware(['auth:sanctum', 'permission:comments.create'])
+    ->name('comments.store');
+
+  Route::put('edit/{comment}', [CommentController::class, 'update'])
+    ->middleware(['auth:sanctum', 'permission:comments.update'])
+    ->name('comments.update');
+
+  Route::delete('delete/{comment}', [CommentController::class, 'destroy'])
+    ->middleware(['auth:sanctum', 'permission:comments.delete'])
+    ->name('comments.destroy');
 });
 
 /*

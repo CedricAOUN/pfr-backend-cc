@@ -28,10 +28,14 @@ class RolesAndPermissionsSeeder extends Seeder
             'recipes.create',
             'recipes.update',
             'recipes.delete',
+            'comments.create',
+            'comments.update',
+            'comments.delete',
+            'likes.update',
+            'favorites.update',
             'premium-recipes.create',
             'premium-recipes.update',
             'premium-recipes.delete',
-            'likes.update',
             'comments.create',
         ];
 
@@ -51,7 +55,6 @@ class RolesAndPermissionsSeeder extends Seeder
             'courses.list',
             'recipes.view',
             'recipes.list',
-            'comments.create',
         ]);
 
         $premiumUser = Role::firstOrCreate(['name' => 'premium_user', 'guard_name' => 'sanctum']);
@@ -63,8 +66,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'recipes.view',
             'recipes.list',
             'premium-recipes.view',
-            'likes.update',
             'comments.create',
+            'comments.update',
+            'comments.delete',
+            'likes.update',
+            'favorites.update',
         ]);
 
         $chef = Role::firstOrCreate(['name' => 'chef', 'guard_name' => 'sanctum']);
@@ -85,8 +91,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'premium-recipes.create',
             'premium-recipes.update',
             'premium-recipes.delete',
-            'likes.update',
             'comments.create',
+            'comments.update',
+            'comments.delete',
+            'likes.update',
+            'favorites.update',
         ]);
 
         // Assign some roles for testing.
