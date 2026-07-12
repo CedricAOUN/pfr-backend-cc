@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -78,7 +79,12 @@ class UserController extends Controller
     }
 
     $validated = $request->validate([
-      'name'       => 'sometimes|required|string|max:255',
+      'name'   => [
+        'sometimes',
+        'string',
+        'max:20',
+        Rule::unique('users', 'name')->ignore($user->id),
+      ],
       'first_name' => 'sometimes|nullable|string|max:255',
       'last_name'  => 'sometimes|nullable|string|max:255',
       'biography'  => 'sometimes|nullable|string',

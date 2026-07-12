@@ -50,10 +50,6 @@ Route::prefix('users')->group(function () {
   Route::post('logout', [UserController::class, 'logout'])
     ->middleware('auth:sanctum')
     ->name('logout');
-
-  Route::get('subscription/{user}', [UserController::class, 'subscriptionStatus'])
-    ->middleware('auth:sanctum')
-    ->name('users.subscription');
 });
 
 /*
