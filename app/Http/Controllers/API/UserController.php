@@ -73,6 +73,10 @@ class UserController extends Controller
 
   function updateInfo(Request $request, User $user)
   {
+    if ($request->user()->id !== $user->id) {
+      return response()->json(['message' => 'Unauthorized'], 403);
+    }
+
     $validated = $request->validate([
       'name'       => 'sometimes|required|string|max:255',
       'first_name' => 'sometimes|nullable|string|max:255',
@@ -104,24 +108,5 @@ class UserController extends Controller
     }
     $user->save();
     return new UserResource($user);
-  }
-
-  function subscriptionStatus(Request $request, User $user)
-  {
-    $user = $request->user();
-    $subscription = $user->subscription('default');
-
-    return response()->json([
-      'is_subscribed' => $subscription && $subscription->valid(),
-      'subscription'   => $subscription ? [
-        'type'          => $subscription->type,
-        'stripe_status' => $subscription->stripe_status,
-        'stripe_price'  => $subscription->stripe_price,
-        'quantity'      => $subscription->quantity,
-        'trial_ends_at' => $subscription->trial_ends_at,
-        'ends_at'       => $subscription->ends_at,
-        'current_period_end' => $subscription->current_period_end,
-      ] : null,
-    ]);
   }
 }
