@@ -55,6 +55,17 @@ class RecipeController extends Controller
       }
     }
 
+    if ($request->filled('likeRange')) {
+      [$minLikes, $maxLikes] = array_map(
+        'intval',
+        explode(',', $request->input('likeRange'))
+      );
+
+      $query
+        ->has('likes', '>=', $minLikes)
+        ->has('likes', '<=', $maxLikes);
+    }
+
     $recipes = $query->get();
 
     // Global min/max across ALL recipes, independent of filters

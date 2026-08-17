@@ -1,0 +1,9 @@
+# Exclude the host-created storage symlink which points outside the build context
+/public/storage
+
+# Common ignores
+/vendor
+/node_modules
+/.git
+.env
+.DS_Store
