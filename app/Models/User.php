@@ -12,6 +12,9 @@ use Spatie\Permission\Traits\HasRoles;
 use Laravel\Cashier\Billable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
+/**
+ * @property string $email
+ */
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */

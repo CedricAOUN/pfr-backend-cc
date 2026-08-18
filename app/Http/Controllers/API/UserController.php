@@ -7,6 +7,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
@@ -39,6 +40,11 @@ class UserController extends Controller
     $validated = $request->validate(['name' => 'required|string|max:255', 'email' => 'required|string|email|max:255|unique:users', 'password' => 'required|string|min:8',]);
     $user = User::create(['name' => $validated['name'], 'email' => $validated['email'], 'password' => Hash::make($validated['password']),]);
     $user->assignRole('regular_user');
+
+    Mail::raw('Welcome to MealMosaic, ' . $user->name . '!', function ($message) use ($user) {
+      $message->to($user->email)->subject('New Account Registration');
+    });
+
     return new UserResource($user);
   }
   function login(Request $request)

@@ -6,6 +6,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
 use Laravel\Cashier\Http\Controllers\WebhookController as CashierController;
 
 class StripeWebhookController extends CashierController
@@ -45,7 +46,7 @@ class StripeWebhookController extends CashierController
    */
   protected function syncRoleForSubscription(array $data): void
   {
-    $user = $this->getUserByStripeId($data['customer'] ?? null);
+    $user = User::where('stripe_id', $data['customer'] ?? null)->first();
 
     if (!$user) {
       Log::warning('Stripe webhook: no user found for customer', [
@@ -85,12 +86,44 @@ class StripeWebhookController extends CashierController
     }
   }
 
+  protected function sendSubscriptionEmail(User $user, string $body, string $subject): void
+  {
+    try {
+      Mail::raw($body, function ($message) use ($user, $subject) {
+        $message->to($user->email)->subject($subject);
+      });
+
+      Log::info('Stripe webhook: subscription email sent', [
+        'user_id' => $user->id,
+        'email' => $user->email,
+        'subject' => $subject,
+      ]);
+    } catch (\Throwable $exception) {
+      Log::error('Stripe webhook: subscription email failed', [
+        'user_id' => $user->id,
+        'email' => $user->email,
+        'subject' => $subject,
+        'error' => $exception->getMessage(),
+      ]);
+    }
+  }
+
   public function handleCustomerSubscriptionUpdated(array $payload)
   {
     $response = parent::handleCustomerSubscriptionUpdated($payload);
     $data = $payload['data']['object'];
     $this->updatePeriodEnd($data);
     $this->syncRoleForSubscription($data);
+    $user = User::where('stripe_id', $data['customer'] ?? null)->first();
+
+    if (!$user) {
+      Log::warning('Stripe webhook: no user found for subscription update email', [
+        'customer' => $data['customer'] ?? null,
+      ]);
+
+      return $response;
+    }
+
     return $response;
   }
 
@@ -100,6 +133,22 @@ class StripeWebhookController extends CashierController
     $data = $payload['data']['object'];
     $this->updatePeriodEnd($data);
     $this->syncRoleForSubscription($data);
+    $user = User::where('stripe_id', $data['customer'] ?? null)->first();
+
+    if (!$user) {
+      Log::warning('Stripe webhook: no user found for subscription creation email', [
+        'customer' => $data['customer'] ?? null,
+      ]);
+
+      return $response;
+    }
+
+    $this->sendSubscriptionEmail(
+      $user,
+      'Your subscription status has been successfully activated.',
+      'Subscription Activated Notification'
+    );
+
     return $response;
   }
 
@@ -109,7 +158,7 @@ class StripeWebhookController extends CashierController
     $data = $payload['data']['object'];
     $this->updatePeriodEnd($data);
 
-    $user = $this->getUserByStripeId($data['customer'] ?? null);
+    $user = User::where('stripe_id', $data['customer'] ?? null)->first();
 
     if (!$user) {
       Log::warning('Stripe webhook: no user found for customer on deletion', [
@@ -117,7 +166,6 @@ class StripeWebhookController extends CashierController
       ]);
       return $response;
     }
-
     // Only downgrade if this was their last active subscription —
     // don't strip access if they hold another active plan.
     $hasOtherActiveSubscription = $user->subscriptions()
@@ -131,6 +179,12 @@ class StripeWebhookController extends CashierController
       }
       $this->assignRoleToUser($user, 'regular_user');
     }
+
+    $this->sendSubscriptionEmail(
+      $user,
+      'Your subscription status has been successfully deactivated.',
+      'Subscription Deactivated Notification'
+    );
 
     return $response;
   }
