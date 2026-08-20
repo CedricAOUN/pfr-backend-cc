@@ -5,11 +5,9 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CourseResource extends JsonResource
+class RecipeCardResource extends JsonResource
 {
     /**
-     * Transform the resource into an array.
-     *
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array
@@ -18,10 +16,13 @@ class CourseResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'description' => $this->description,
-            'video_stream_url' => $this->video_path
-                ? route('courses.video', $this->id)
+            'is_premium' => $this->is_premium,
+            'image_url' => $this->image_url
+                ? (str_starts_with($this->image_url, 'http') ? $this->image_url : asset($this->image_url))
                 : null,
-            'expert' => new PublicUserResource($this->whenLoaded('expert')),
+            'creator' => collect($this->creator)->only(['id', 'name', 'first_name', 'last_name', 'avatar_url']),
+            'likes' => ['count' => $this->whenCounted('likes')],
+            'favorites' => ['count' => $this->whenCounted('favorites')],
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

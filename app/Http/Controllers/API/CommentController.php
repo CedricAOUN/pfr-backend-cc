@@ -9,55 +9,44 @@ use Illuminate\Http\Request;
 class CommentController extends Controller
 {
     // Comment CRUD
-    function index()
+    public function index()
     {
         // Comments are sent with their recipes. No need for index method yet.
     }
 
-    function store(Request $request)
+    public function store(Request $request)
     {
-        $user = auth('sanctum')->user();
-        $request->validate([
+        $validated = $request->validate([
             'content' => 'required|string',
             'recipe_id' => 'required|exists:recipes,id',
         ]);
 
-        $request->merge(['creator_id' => $user->id]);
-
-        $comment = Comment::create($request->all());
+        $comment = Comment::create([
+            'content' => $validated['content'],
+            'recipe_id' => $validated['recipe_id'],
+            'creator_id' => $request->user()->id,
+        ]);
 
         return response()->json($comment, 201);
     }
 
-    function update(Request $request, $id)
+    public function update(Request $request, Comment $comment)
     {
-        $user = auth('sanctum')->user();
-        $comment = Comment::findOrFail($id);
+        $this->authorize('update', $comment);
 
-        if ($comment->creator_id !== $user->id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-
-        $request->validate([
+        $validated = $request->validate([
             'content' => 'sometimes|required|string',
-            'creator_id' => 'sometimes|required|exists:users,id',
-            'recipe_id' => 'sometimes|required|exists:recipes,id',
         ]);
 
-        $comment->update($request->all());
+        $comment->update($validated);
 
         return response()->json($comment);
     }
 
-    function destroy($id)
+    public function destroy(Comment $comment)
     {
-        $user = auth('sanctum')->user();
-        $comment = Comment::findOrFail($id);
+        $this->authorize('delete', $comment);
 
-        if ($comment->creator_id !== $user->id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-        $comment = Comment::findOrFail($id);
         $comment->delete();
 
         return response()->json(null, 204);

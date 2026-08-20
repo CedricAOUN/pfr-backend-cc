@@ -16,7 +16,7 @@ class FavoriteResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'user' => new UserResource($this->whenLoaded('user')),
+            'user' => new PublicUserResource($this->whenLoaded('user')),
             'recipe' => new RecipeResource($this->whenLoaded('recipe')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

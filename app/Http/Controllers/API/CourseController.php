@@ -10,105 +10,110 @@ use Illuminate\Support\Facades\Storage;
 
 class CourseController extends Controller
 {
-  function index(Request $request)
-  {
-    $query = Course::with('expert');
+    public function index(Request $request)
+    {
+        $query = Course::with('expert');
 
-    if ($request->has('search')) {
-      $search = $request->input('search');
-      $query->where(function ($q) use ($search) {
-        $q->where('title', 'like', '%' . $search . '%')
-          ->orWhere('description', 'like', '%' . $search . '%');
-      });
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', '%'.$search.'%')
+                    ->orWhere('description', 'like', '%'.$search.'%');
+            });
+        }
+
+        return CourseResource::collection($query->get());
     }
 
-    return CourseResource::collection($query->get());
-  }
-
-  function show(Course $course)
-  {
-    return new CourseResource($course->load('expert'));
-  }
-
-  function store(Request $request)
-  {
-    $validated = $request->validate([
-      'title'      => 'required|string|max:255',
-      'description' => 'required|string',
-      'content'    => 'sometimes|nullable|string',
-      'video'      => 'nullable|file|mimes:mp4,mov,avi,wmv|max:204800', // 200 MB
-    ]);
-
-    $videoPath = null;
-    if ($request->hasFile('video')) {
-      $videoPath = $request->file('video')->store('course_videos', 'local');
+    public function show(Course $course)
+    {
+        return new CourseResource($course->load('expert'));
     }
 
-    $course = Course::create([
-      'title'       => $validated['title'],
-      'description' => $validated['description'],
-      'content'     => $validated['content'] ?? null,
-      'video_path'  => $videoPath,
-      'expert_id'   => $request->user()->id,
-    ]);
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'content' => 'sometimes|nullable|string',
+            'video' => 'nullable|file|mimes:mp4,mov,avi,wmv|max:204800', // 200 MB
+        ]);
 
-    return new CourseResource($course);
-  }
+        $videoPath = null;
+        if ($request->hasFile('video')) {
+            $videoPath = $request->file('video')->store('course_videos', 'local');
+        }
 
-  function update(Request $request, Course $course)
-  {
-    $validated = $request->validate([
-      'title'       => 'sometimes|required|string|max:255',
-      'description' => 'sometimes|required|string',
-      'content'     => 'sometimes|nullable|string',
-      'video'      => 'nullable|file|mimes:mp4,mov,avi,wmv|max:204800', // 200 MB
-    ]);
+        $course = Course::create([
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'content' => $validated['content'] ?? null,
+            'video_path' => $videoPath,
+            'expert_id' => $request->user()->id,
+        ]);
 
-    if (isset($validated['title'])) {
-      $course->title = $validated['title'];
-    }
-    if (isset($validated['description'])) {
-      $course->description = $validated['description'];
-    }
-    if (array_key_exists('content', $validated)) {
-      $course->content = $validated['content'];
-    }
-    if ($request->hasFile('video')) {
-      // Delete old video if exists
-      if ($course->video_path && Storage::disk('local')->exists($course->video_path)) {
-        Storage::disk('local')->delete($course->video_path);
-      }
-      // Store new video
-      $course->video_path = $request->file('video')->store('course_videos', 'local');
+        return new CourseResource($course);
     }
 
-    $course->save();
+    public function update(Request $request, Course $course)
+    {
+        $this->authorize('update', $course);
 
-    return new CourseResource($course);
-  }
+        $validated = $request->validate([
+            'title' => 'sometimes|required|string|max:255',
+            'description' => 'sometimes|required|string',
+            'content' => 'sometimes|nullable|string',
+            'video' => 'nullable|file|mimes:mp4,mov,avi,wmv|max:204800', // 200 MB
+        ]);
 
-  function destroy(Request $request, Course $course)
-  {
-    // Delete video file if exists
-    if ($course->video_path && Storage::disk('local')->exists($course->video_path)) {
-      Storage::disk('local')->delete($course->video_path);
+        if (isset($validated['title'])) {
+            $course->title = $validated['title'];
+        }
+        if (isset($validated['description'])) {
+            $course->description = $validated['description'];
+        }
+        if (array_key_exists('content', $validated)) {
+            $course->content = $validated['content'];
+        }
+        if ($request->hasFile('video')) {
+            // Delete old video if exists
+            if ($course->video_path && Storage::disk('local')->exists($course->video_path)) {
+                Storage::disk('local')->delete($course->video_path);
+            }
+            // Store new video
+            $course->video_path = $request->file('video')->store('course_videos', 'local');
+        }
+
+        $course->save();
+
+        return new CourseResource($course);
     }
-    $course->delete();
-    return response()->noContent();
-  }
 
-  function streamVideo(Request $request, Course $course)
-  {
-    if (!$course->video_path || !Storage::disk('local')->exists($course->video_path)) {
-      return response()->json(['message' => 'Video not found.'], 404);
+    public function destroy(Request $request, Course $course)
+    {
+        $this->authorize('delete', $course);
+
+        // Delete video file if exists
+        if ($course->video_path && Storage::disk('local')->exists($course->video_path)) {
+            Storage::disk('local')->delete($course->video_path);
+        }
+        $course->delete();
+
+        return response()->noContent();
     }
 
-    $fullPath = Storage::disk('local')->path($course->video_path);
-    $mimeType = mime_content_type($fullPath) ?: 'video/mp4';
+    public function streamVideo(Request $request, Course $course)
+    {
+        if (! $course->video_path || ! Storage::disk('local')->exists($course->video_path)) {
+            return response()->json(['message' => 'Video not found.'], 404);
+        }
 
-    return response()->file($fullPath, [
-      'Content-Type'        => $mimeType,
-      'Content-Disposition' => 'inline',
-    ]);
-  }
+        $fullPath = Storage::disk('local')->path($course->video_path);
+        $mimeType = mime_content_type($fullPath) ?: 'video/mp4';
+
+        return response()->file($fullPath, [
+            'Content-Type' => $mimeType,
+            'Content-Disposition' => 'inline',
+        ]);
+    }
 }
