@@ -32,7 +32,9 @@ class RecipeResource extends JsonResource
             'ingredients' => IngredientResource::collection($this->whenLoaded('ingredients') ?: collect()),
             'instructions' => $this->instructions,
             'is_premium' => $this->is_premium,
-            'image_url' => $this->image_url,
+            'image_url' => $this->image_url
+                ? (str_starts_with($this->image_url, 'http') ? $this->image_url : asset($this->image_url))
+                : null,
             'creator' => $creator,
             'comments' => CommentResource::collection($this->whenLoaded('comments')),
             'likes' => [

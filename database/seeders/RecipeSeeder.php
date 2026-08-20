@@ -28,10 +28,10 @@ class RecipeSeeder extends Seeder
 
         foreach (
             [
-                ['name' => 'Pâte brisée', 'quantity' => 1, 'unit' => 'pâte'],
-                ['name' => 'Pommes', 'quantity' => 5, 'unit' => 'pièces'],
+                ['name' => 'Pâte brisée', 'quantity' => 1, 'unit' => 'pcs'],
+                ['name' => 'Pommes', 'quantity' => 5, 'unit' => 'pcs'],
                 ['name' => 'Sucre', 'quantity' => 50, 'unit' => 'g'],
-                ['name' => 'Cannelle', 'quantity' => 1, 'unit' => 'c. à café'],
+                ['name' => 'Cannelle', 'quantity' => 1, 'unit' => 'tbsp'],
                 ['name' => 'Beurre', 'quantity' => 30, 'unit' => 'g']
             ] as $ing
         ) {
@@ -52,7 +52,7 @@ class RecipeSeeder extends Seeder
                 ['name' => 'Riz arborio', 'quantity' => 300, 'unit' => 'g'],
                 ['name' => 'Champignons de Paris', 'quantity' => 200, 'unit' => 'g'],
                 ['name' => 'Cèpes séchés', 'quantity' => 20, 'unit' => 'g'],
-                ['name' => 'Oignon', 'quantity' => 1, 'unit' => 'pièce'],
+                ['name' => 'Oignon', 'quantity' => 1, 'unit' => 'pcs'],
                 ['name' => 'Bouillon de légumes', 'quantity' => 1, 'unit' => 'L'],
                 ['name' => 'Vin blanc', 'quantity' => 100, 'unit' => 'ml'],
                 ['name' => 'Parmesan râpé', 'quantity' => 50, 'unit' => 'g'],
@@ -73,14 +73,14 @@ class RecipeSeeder extends Seeder
 
         foreach (
             [
-                ['name' => 'Poulet entier', 'quantity' => 1, 'unit' => 'pièce'],
+                ['name' => 'Poulet entier', 'quantity' => 1, 'unit' => 'pcs'],
                 ['name' => 'Beurre', 'quantity' => 50, 'unit' => 'g'],
-                ['name' => 'Thym', 'quantity' => 2, 'unit' => 'brins'],
-                ['name' => 'Romarin', 'quantity' => 2, 'unit' => 'brins'],
-                ['name' => 'Citron', 'quantity' => 1, 'unit' => 'pièce'],
-                ['name' => 'Ail', 'quantity' => 4, 'unit' => 'gousses'],
-                ['name' => 'Sel', 'quantity' => 1, 'unit' => 'c. à café'],
-                ['name' => 'Poivre', 'quantity' => 0.5, 'unit' => 'c. à café']
+                ['name' => 'Thym', 'quantity' => 2, 'unit' => 'g'],
+                ['name' => 'Romarin', 'quantity' => 2, 'unit' => 'g'],
+                ['name' => 'Citron', 'quantity' => 1, 'unit' => 'pcs'],
+                ['name' => 'Ail', 'quantity' => 4, 'unit' => 'pcs'],
+                ['name' => 'Sel', 'quantity' => 1, 'unit' => 'tbsp'],
+                ['name' => 'Poivre', 'quantity' => 0.5, 'unit' => 'tbsp']
             ] as $ing
         ) {
             Ingredient::create(array_merge($ing, ['recipe_id' => $recipe3->id]));
@@ -97,13 +97,13 @@ class RecipeSeeder extends Seeder
 
         foreach (
             [
-                ['name' => 'Carottes', 'quantity' => 3, 'unit' => 'pièces'],
-                ['name' => 'Pomme de terre', 'quantity' => 2, 'unit' => 'pièces'],
-                ['name' => 'Poireau', 'quantity' => 1, 'unit' => 'pièce'],
-                ['name' => 'Oignon', 'quantity' => 1, 'unit' => 'pièce'],
+                ['name' => 'Carottes', 'quantity' => 3, 'unit' => 'pcs'],
+                ['name' => 'Pomme de terre', 'quantity' => 2, 'unit' => 'pcs'],
+                ['name' => 'Poireau', 'quantity' => 1, 'unit' => 'pcs'],
+                ['name' => 'Oignon', 'quantity' => 1, 'unit' => 'pcs'],
                 ['name' => 'Bouillon de légumes', 'quantity' => 1, 'unit' => 'L'],
-                ['name' => 'Sel', 'quantity' => 1, 'unit' => 'c. à café'],
-                ['name' => 'Poivre', 'quantity' => 0.5, 'unit' => 'c. à café']
+                ['name' => 'Sel', 'quantity' => 1, 'unit' => 'tbsp'],
+                ['name' => 'Poivre', 'quantity' => 0.5, 'unit' => 'tbsp']
             ] as $ing
         ) {
             Ingredient::create(array_merge($ing, ['recipe_id' => $recipe4->id]));
@@ -121,9 +121,9 @@ class RecipeSeeder extends Seeder
         foreach (
             [
                 ['name' => 'Crème liquide', 'quantity' => 500, 'unit' => 'ml'],
-                ['name' => 'Jaunes d\'œufs', 'quantity' => 6, 'unit' => 'pièces'],
+                ['name' => 'Jaunes d\'œufs', 'quantity' => 6, 'unit' => 'pcs'],
                 ['name' => 'Sucre', 'quantity' => 100, 'unit' => 'g'],
-                ['name' => 'Gousses de vanille', 'quantity' => 2, 'unit' => 'pièces']
+                ['name' => 'Gousses de vanille', 'quantity' => 2, 'unit' => 'pcs']
             ] as $ing
         ) {
             Ingredient::create(array_merge($ing, ['recipe_id' => $recipe5->id]));
@@ -140,14 +140,14 @@ class RecipeSeeder extends Seeder
 
         foreach (
             [
-                ['name' => 'Laitue romaine', 'quantity' => 1, 'unit' => 'pièce'],
+                ['name' => 'Laitue romaine', 'quantity' => 1, 'unit' => 'pcs'],
                 ['name' => 'Poulet grillé', 'quantity' => 200, 'unit' => 'g'],
                 ['name' => 'Croûtons à l\'ail', 'quantity' => 50, 'unit' => 'g'],
                 ['name' => 'Parmesan en copeaux', 'quantity' => 30, 'unit' => 'g'],
-                ['name' => 'Jaune d\'œuf', 'quantity' => 1, 'unit' => 'pièce'],
-                ['name' => 'Ail', 'quantity' => 1, 'unit' => 'gousse'],
-                ['name' => 'Anchois', 'quantity' => 2, 'unit' => 'filets'],
-                ['name' => 'Citron', 'quantity' => 0.5, 'unit' => 'pièce'],
+                ['name' => 'Jaune d\'œuf', 'quantity' => 1, 'unit' => 'pcs'],
+                ['name' => 'Ail', 'quantity' => 1, 'unit' => 'pcs'],
+                ['name' => 'Anchois', 'quantity' => 2, 'unit' => 'pcs'],
+                ['name' => 'Citron', 'quantity' => 0.5, 'unit' => 'pcs'],
                 ['name' => 'Huile d\'olive', 'quantity' => 100, 'unit' => 'ml']
             ] as $ing
         ) {

@@ -8,6 +8,7 @@ use App\Models\Ingredient;
 use App\Models\Recipe;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class RecipeController extends Controller
 {
@@ -106,16 +107,34 @@ class RecipeController extends Controller
       'ingredients.*.quantity' => 'required|numeric',
       'ingredients.*.unit' => 'required|string',
       'instructions' => 'required|string',
+      'image_file' => 'nullable|image|max:2048', // max 2MB
       'is_premium' => 'boolean',
     ]);
-    if ($validated['is_premium'] && $user instanceof User && !$user->hasPermissionTo('premium-recipes.create')) {
+    if (($validated['is_premium'] ?? false) && $user instanceof User && !$user->hasPermissionTo('premium-recipes.create')) {
       return response()->json(['message' => 'You do not have permission to create premium recipes.'], 403);
     }
 
-    $recipe = Recipe::create(array_merge($validated, ['creator_id' => $request->user()->id]));
+    $recipe = Recipe::create([
+      'title' => $validated['title'],
+      'description' => $validated['description'],
+      'instructions' => $validated['instructions'],
+      'is_premium' => $validated['is_premium'] ?? false,
+      'creator_id' => $request->user()->id,
+    ]);
+
     foreach ($validated['ingredients'] as $ingredient) {
       $recipe->ingredients()->create($ingredient);
     }
+
+    if ($request->hasFile('image_file')) {
+      $path = $request->file('image_file')->store('recipe_images', 'public');
+      $recipe->image_url = Storage::url($path);
+      $recipe->save();
+    } else {
+      $recipe->image_url = 'https://placehold.co/400x400.png?text=No+Image';
+      $recipe->save();
+    }
+
     return new RecipeResource($recipe->load('ingredients'));
   }
 
@@ -129,6 +148,7 @@ class RecipeController extends Controller
       'ingredients.*.quantity' => 'numeric',
       'ingredients.*.unit' => 'string',
       'instructions' => 'string',
+      'image_file' => 'nullable|image|max:2048', // max 2MB
       'is_premium' => 'boolean',
     ]);
     $recipe->update($validated);
@@ -138,6 +158,13 @@ class RecipeController extends Controller
         $recipe->ingredients()->create($ingredient);
       }
     }
+
+    if ($request->hasFile('image_file')) {
+      $path = $request->file('image_file')->store('recipe_images', 'public');
+      $recipe->image_url = Storage::url($path);
+      $recipe->save();
+    }
+
     return new RecipeResource($recipe->load('ingredients'));
   }
 

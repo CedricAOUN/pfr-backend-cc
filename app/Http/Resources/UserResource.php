@@ -25,7 +25,9 @@ class UserResource extends JsonResource
                 'id' => $recipeId,
                 'title' => $recipe->title,
                 'description' => $recipe->description,
-                'image_url' => $recipe->image_url,
+                'image_url' => $recipe->image_url
+                    ? (str_starts_with($recipe->image_url, 'http') ? $recipe->image_url : asset($recipe->image_url))
+                    : null,
             ];
         }
 
