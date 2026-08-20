@@ -33,6 +33,9 @@ Route::prefix('users')->group(function () {
         ->middleware('auth:sanctum')
         ->name('users.me');
 
+    Route::get('chefs', [UserController::class, 'listChefs'])
+        ->name('users.chefs');
+
     Route::get('{user}', [UserController::class, 'show'])
         ->middleware(['auth:sanctum', 'permission:users.view'])
         ->name('users.show');
@@ -132,8 +135,8 @@ Route::prefix('courses')->group(function () {
 
     Route::get('{course}/video', [CourseController::class, 'streamVideo'])
         ->middleware(['auth:sanctum', 'permission:courses.view'])
-      // if streaming requires a paid purchase specifically, that's a policy
-      // check beyond "can view courses" — flag for follow-up
+        // if streaming requires a paid purchase specifically, that's a policy
+        // check beyond "can view courses" — flag for follow-up
         ->name('courses.video');
 });
 

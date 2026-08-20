@@ -22,10 +22,10 @@ class UserController extends Controller
         if ($request->has('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', '%'.$search.'%')
-                    ->orWhere('email', 'like', '%'.$search.'%')
-                    ->orWhere('first_name', 'like', '%'.$search.'%')
-                    ->orWhere('last_name', 'like', '%'.$search.'%');
+                $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%')
+                    ->orWhere('first_name', 'like', '%' . $search . '%')
+                    ->orWhere('last_name', 'like', '%' . $search . '%');
             });
         }
 
@@ -47,7 +47,7 @@ class UserController extends Controller
         $user = User::create(['name' => $validated['name'], 'email' => $validated['email'], 'password' => Hash::make($validated['password'])]);
         $user->assignRole('regular_user');
 
-        Mail::raw('Welcome to MealMosaic, '.$user->name.'!', function ($message) use ($user) {
+        Mail::raw('Welcome to MealMosaic, ' . $user->name . '!', function ($message) use ($user) {
             $message->to($user->email)->subject('New Account Registration');
         });
 
@@ -126,7 +126,7 @@ class UserController extends Controller
     {
         $this->authorize('update', $user);
 
-        $validated = $request->validate(['email' => 'sometimes|required|string|email|max:255|unique:users,email,'.$user->id, 'password' => 'sometimes|required|string|min:8']);
+        $validated = $request->validate(['email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $user->id, 'password' => 'sometimes|required|string|min:8']);
         if (isset($validated['email'])) {
             $user->email = $validated['email'];
         }
@@ -136,5 +136,23 @@ class UserController extends Controller
         $user->save();
 
         return new UserResource($user);
+    }
+
+    public function listChefs(Request $request)
+    {
+        $query = User::role('chef'); // spatie/laravel-permission scope
+
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('first_name', 'like', '%' . $search . '%')
+                    ->orWhere('last_name', 'like', '%' . $search . '%');
+            });
+        }
+
+        $chefs = $query->get();
+
+        return PublicUserResource::collection($chefs);
     }
 }
