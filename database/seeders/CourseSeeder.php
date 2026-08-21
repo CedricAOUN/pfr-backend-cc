@@ -20,14 +20,14 @@ class CourseSeeder extends Seeder
             'title' => 'Les bases de la pâtisserie française',
             'description' => 'Apprenez les techniques fondamentales de la pâtisserie : pâtes, crèmes, meringues et plus encore. Ce cours vous donnera toutes les clés pour réussir vos desserts comme un professionnel.',
             'content' => 'Dans ce cours, vous apprendrez les techniques de base de la pâtisserie française, y compris la préparation des pâtes, des crèmes et des meringues, ainsi que des recettes classiques.',
-            'expert_id' => $users->first()->id,
+            'expert_id' => $users->where('name', 'chef_martin')->first()->id,
         ]);
 
         Course::create([
             'title' => 'Maîtriser les sauces classiques',
             'description' => 'Du beurre blanc à la béarnaise, en passant par la hollandaise et la béchamel. Découvrez les secrets des grandes sauces de la cuisine française.',
             'content' => 'Dans ce cours, vous apprendrez à préparer et maîtriser les sauces classiques de la cuisine française, en comprenant les techniques et les ingrédients nécessaires.',
-            'expert_id' => $users->first()->id,
+            'expert_id' => $users->where('name', 'chef_martin')->first()->id,
         ]);
 
         Course::create([
@@ -48,7 +48,7 @@ class CourseSeeder extends Seeder
             'title' => 'Techniques de découpe professionnelles',
             'description' => 'Apprenez à utiliser vos couteaux comme un chef : julienne, brunoise, chiffonnade et bien plus.',
             'content' => 'Dans ce cours, vous apprendrez les techniques de découpe professionnelles, y compris la julienne, la brunoise et la chiffonnade.',
-            'expert_id' => $users->first()->id,
+            'expert_id' => $users->where('name', 'chef_martin')->first()->id,
         ]);
     }
 }

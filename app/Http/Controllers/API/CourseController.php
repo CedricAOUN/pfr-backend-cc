@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CourseResource;
+use App\Http\Resources\RedactedCourseResource;
 use App\Models\Course;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -17,12 +18,16 @@ class CourseController extends Controller
         if ($request->has('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', '%'.$search.'%')
-                    ->orWhere('description', 'like', '%'.$search.'%');
+                $q->where('title', 'like', '%' . $search . '%')
+                    ->orWhere('description', 'like', '%' . $search . '%');
             });
         }
+        if ($request->has('creator_id')) {
+            $creatorId = $request->input('creator_id');
+            $query->where('expert_id', $creatorId);
+        }
 
-        return CourseResource::collection($query->get());
+        return RedactedCourseResource::collection($query->get());
     }
 
     public function show(Course $course)
@@ -115,5 +120,19 @@ class CourseController extends Controller
             'Content-Type' => $mimeType,
             'Content-Disposition' => 'inline',
         ]);
+    }
+    public function listCourses(Request $request)
+    {
+        $query = Course::with('expert');
+
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', '%' . $search . '%')
+                    ->orWhere('description', 'like', '%' . $search . '%');
+            });
+        }
+
+        return RedactedCourseResource::collection($query->get());
     }
 }

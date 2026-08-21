@@ -34,7 +34,12 @@ class UserController extends Controller
 
     public function show(Request $request, User $user)
     {
-        if ($request->user()->id === $user->id || $request->user()->hasRole('admin')) {
+        $authenticatedUser = $request->user('sanctum');
+
+        if (
+            $authenticatedUser &&
+            ($authenticatedUser->is($user) || $authenticatedUser->hasRole('admin'))
+        ) {
             return new UserResource($user->load('favorites'));
         }
 

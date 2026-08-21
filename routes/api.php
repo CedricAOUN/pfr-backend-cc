@@ -37,7 +37,6 @@ Route::prefix('users')->group(function () {
         ->name('users.chefs');
 
     Route::get('{user}', [UserController::class, 'show'])
-        ->middleware(['auth:sanctum', 'permission:users.view'])
         ->name('users.show');
 
     Route::put('edit/{user}', [UserController::class, 'updateInfo'])
@@ -116,6 +115,8 @@ Route::prefix('comments')->group(function () {
 Route::prefix('courses')->group(function () {
     // Public: list only, same reasoning as recipes
     Route::get('/', [CourseController::class, 'index'])->name('courses.index');
+
+    Route::get('/list', [CourseController::class, 'listCourses'])->name('courses.list');
 
     Route::get('{course}', [CourseController::class, 'show'])
         ->middleware(['auth:sanctum', 'permission:courses.view'])
