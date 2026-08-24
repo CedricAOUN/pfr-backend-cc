@@ -39,19 +39,20 @@ class CourseController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'required|string',
+            'description' => 'sometimes|nullable|string',
             'content' => 'sometimes|nullable|string',
             'video' => 'nullable|file|mimes:mp4,mov,avi,wmv|max:204800', // 200 MB
         ]);
 
         $videoPath = null;
         if ($request->hasFile('video')) {
-            $videoPath = $request->file('video')->store('course_videos', 'local');
+            $path = $request->file('video')->store('course_videos', 'public');
+            $videoPath = '/storage/'.$path;
         }
 
         $course = Course::create([
             'title' => $validated['title'],
-            'description' => $validated['description'],
+            'description' => $validated['description'] ?? null,
             'content' => $validated['content'] ?? null,
             'video_path' => $videoPath,
             'expert_id' => $request->user()->id,
@@ -66,7 +67,7 @@ class CourseController extends Controller
 
         $validated = $request->validate([
             'title' => 'sometimes|required|string|max:255',
-            'description' => 'sometimes|required|string',
+            'description' => 'sometimes|nullable|string',
             'content' => 'sometimes|nullable|string',
             'video' => 'nullable|file|mimes:mp4,mov,avi,wmv|max:204800', // 200 MB
         ]);
@@ -82,11 +83,13 @@ class CourseController extends Controller
         }
         if ($request->hasFile('video')) {
             // Delete old video if exists
-            if ($course->video_path && Storage::disk('local')->exists($course->video_path)) {
-                Storage::disk('local')->delete($course->video_path);
+            if ($course->video_path) {
+                $oldPath = str_replace('/storage/', '', parse_url($course->video_path, PHP_URL_PATH));
+                Storage::disk('public')->delete($oldPath);
             }
             // Store new video
-            $course->video_path = $request->file('video')->store('course_videos', 'local');
+            $path = $request->file('video')->store('course_videos', 'public');
+            $course->video_path = '/storage/'.$path;
         }
 
         $course->save();
@@ -99,8 +102,9 @@ class CourseController extends Controller
         $this->authorize('delete', $course);
 
         // Delete video file if exists
-        if ($course->video_path && Storage::disk('local')->exists($course->video_path)) {
-            Storage::disk('local')->delete($course->video_path);
+        if ($course->video_path) {
+            $videoPath = str_replace('/storage/', '', parse_url($course->video_path, PHP_URL_PATH));
+            Storage::disk('public')->delete($videoPath);
         }
         $course->delete();
 
@@ -109,11 +113,15 @@ class CourseController extends Controller
 
     public function streamVideo(Request $request, Course $course)
     {
-        if (! $course->video_path || ! Storage::disk('local')->exists($course->video_path)) {
+        $videoPath = $course->video_path
+            ? str_replace('/storage/', '', parse_url($course->video_path, PHP_URL_PATH))
+            : null;
+
+        if (! $videoPath || ! Storage::disk('public')->exists($videoPath)) {
             return response()->json(['message' => 'Video not found.'], 404);
         }
 
-        $fullPath = Storage::disk('local')->path($course->video_path);
+        $fullPath = Storage::disk('public')->path($videoPath);
         $mimeType = mime_content_type($fullPath) ?: 'video/mp4';
 
         return response()->file($fullPath, [

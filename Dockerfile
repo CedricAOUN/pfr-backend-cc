@@ -20,6 +20,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Ensure $_ENV is populated from process environment so docker-compose vars
 # take precedence over .env file values (required for phpdotenv createImmutable)
 RUN echo "variables_order = EGPCS" > /usr/local/etc/php/conf.d/app.ini
+COPY docker/php/uploads.ini /usr/local/etc/php/conf.d/uploads.ini
 
 WORKDIR /app
 

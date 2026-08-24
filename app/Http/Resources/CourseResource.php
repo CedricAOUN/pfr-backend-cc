@@ -14,12 +14,17 @@ class CourseResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $videoPath = $this->video_path
+            ? parse_url($this->video_path, PHP_URL_PATH)
+            : null;
+
         return [
             'id' => $this->id,
             'title' => $this->title,
             'description' => $this->description,
-            'video_stream_url' => $this->video_path
-                ? route('courses.video', $this->id)
+            'content' => $this->content,
+            'video_url' => is_string($videoPath)
+                ? asset($videoPath)
                 : null,
             'created_by' => new PublicUserResource($this->whenLoaded('expert')),
             'created_at' => $this->created_at,

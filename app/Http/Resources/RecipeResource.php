@@ -36,7 +36,7 @@ class RecipeResource extends JsonResource
                 ? (str_starts_with($this->image_url, 'http') ? $this->image_url : asset($this->image_url))
                 : null,
             'creator' => $creator,
-            'comments' => CommentResource::collection($this->whenLoaded('comments')),
+            'comments' => CommentResource::collection($this->whenLoaded('comments')->sortByDesc('created_at')),
             'likes' => [
                 'count' => $this->whenCounted('likes'),
                 'is_liked_by_user' => $isLikedByCurrentUser,
