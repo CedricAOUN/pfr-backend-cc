@@ -30,7 +30,7 @@ class UserResource extends JsonResource
             }
         }
 
-        $isChef = $this->hasRole('chef');
+        $isChef = $this->hasRole('chef') || $this->hasRole('admin');
         $isPremium = $this->hasAnyRole(['premium_user', 'chef', 'admin']);
         $subscription = $this->subscription('default');
 
@@ -49,7 +49,7 @@ class UserResource extends JsonResource
             'premium_expire' => $subscription?->current_period_end,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            'favorite_recipes' => $this->whenLoaded('favorites', fn () => $favoriteRecipeCards),
+            'favorite_recipes' => $this->whenLoaded('favorites', fn() => $favoriteRecipeCards),
         ];
     }
 }
