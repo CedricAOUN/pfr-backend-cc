@@ -242,7 +242,7 @@ class RecipeController extends Controller
                 'messages' => [
                     [
                         'role' => 'system',
-                        'content' => 'Summarize the supplied recipe in 2 or 3 concise sentences. Use the same language as the recipe steps. Mention only useful ingredients and the essential cooking process. Do not add facts, headings, or formatting.',
+                        'content' => config('groq.system_prompt'),
                     ],
                     [
                         'role' => 'user',

@@ -127,4 +127,8 @@ return [
         'voice' => env('GROQ_SPEECH_VOICE', 'Bryan-PlayAI'),
         'response_format' => env('GROQ_SPEECH_FORMAT', 'wav'),
     ],
+
+    'system_prompt' => "You will be given a list of ingredients, and some steps to follow. 
+        In the language of the steps given, generate a helpful step by step guide to make the recipe, elaborating on the steps given if necessary. 
+        Format your response in markdown format. Do not reiterate the ingredients, simply focus on the step by step guide."
 ];
