@@ -36,7 +36,11 @@ class RecipeResource extends JsonResource
                 ? (str_starts_with($this->image_url, 'http') ? $this->image_url : asset($this->image_url))
                 : null,
             'creator' => $creator,
-            'comments' => CommentResource::collection($this->whenLoaded('comments')->sortByDesc('created_at')),
+            'comments' => CommentResource::collection(
+                $this->relationLoaded('comments')
+                    ? $this->comments->sortByDesc('created_at')
+                    : collect()
+            ),
             'likes' => [
                 'count' => $this->whenCounted('likes'),
                 'is_liked_by_user' => $isLikedByCurrentUser,
@@ -45,6 +49,7 @@ class RecipeResource extends JsonResource
                 'count' => $this->whenCounted('favorites'),
                 'is_favorited_by_user' => $isFavoritedByCurrentUser,
             ],
+            'suggestion' => new SuggestionResource($this->whenLoaded('suggestion')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

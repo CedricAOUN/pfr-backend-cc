@@ -65,6 +65,9 @@ Route::prefix('recipes')->group(function () {
     Route::get('{recipe}', [RecipeController::class, 'show'])
         ->name('recipes.show');
 
+    Route::get('{recipe}/ai', [RecipeController::class, 'askAI'])
+        ->name('recipes.ai');
+
     Route::post('create', [RecipeController::class, 'store'])
         ->middleware(['auth:sanctum', 'permission:recipes.create'])
         ->name('recipes.store');

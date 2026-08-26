@@ -14,25 +14,35 @@ class Recipe extends Model
         'creator_id',
         'image_url',
     ];
+
     public function creator()
     {
         return $this->belongsTo(User::class, 'creator_id');
     }
+
     public function comments()
     {
         return $this->hasMany(Comment::class, 'recipe_id');
     }
+
     public function likes()
     {
         return $this->hasMany(Like::class, 'recipe_id');
     }
+
     public function favorites()
     {
         return $this->hasMany(Favorite::class, 'recipe_id');
     }
+
     public function ingredients()
     {
         return $this->hasMany(Ingredient::class);
+    }
+
+    public function suggestion()
+    {
+        return $this->hasOne(Suggestion::class);
     }
 
     protected function casts()

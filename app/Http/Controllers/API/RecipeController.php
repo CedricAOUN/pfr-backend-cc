@@ -5,11 +5,16 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\RecipeCardResource;
 use App\Http\Resources\RecipeResource;
+use App\Http\Resources\SuggestionResource;
 use App\Models\Ingredient;
 use App\Models\Recipe;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use LucianoTonet\GroqLaravel\Facades\Groq;
+use RuntimeException;
+use Throwable;
 
 class RecipeController extends Controller
 {
@@ -89,7 +94,7 @@ class RecipeController extends Controller
     {
         $this->authorizeForUser(auth('sanctum')->user(), 'view', $recipe);
 
-        return new RecipeResource($recipe->load(['creator', 'comments.creator', 'likes', 'favorites', 'ingredients'])->loadCount(['likes', 'favorites']));
+        return new RecipeResource($recipe->load(['creator', 'comments.creator', 'likes', 'favorites', 'ingredients', 'suggestion'])->loadCount(['likes', 'favorites']));
     }
 
     public function store(Request $request)
@@ -208,5 +213,68 @@ class RecipeController extends Controller
 
             return response()->json(['message' => 'Recipe added to favorites.']);
         }
+    }
+
+    public function askAI(Request $request, Recipe $recipe)
+    {
+        $this->authorizeForUser(auth('sanctum')->user(), 'view', $recipe);
+
+        $existingSuggestion = $recipe->suggestion()->first();
+
+        if ($existingSuggestion) {
+            return new SuggestionResource($existingSuggestion);
+        }
+
+        $recipe->loadMissing('ingredients');
+
+        $ingredients = $recipe->ingredients
+            ->map(fn (Ingredient $ingredient) => sprintf(
+                '- %s %s %s',
+                $ingredient->quantity,
+                $ingredient->unit,
+                $ingredient->name,
+            ))
+            ->implode("\n");
+
+        try {
+            $response = Groq::chat()->completions()->create([
+                'model' => config('groq.model'),
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => 'Summarize the supplied recipe in 2 or 3 concise sentences. Use the same language as the recipe steps. Mention only useful ingredients and the essential cooking process. Do not add facts, headings, or formatting.',
+                    ],
+                    [
+                        'role' => 'user',
+                        'content' => "Ingredients:\n{$ingredients}\n\nSteps:\n{$recipe->instructions}",
+                    ],
+                ],
+                'temperature' => 0.2,
+                'max_tokens' => config('groq.options.max_tokens', 150),
+            ]);
+
+            $summary = trim((string) data_get($response, 'choices.0.message.content'));
+
+            if ($summary === '') {
+                throw new RuntimeException('Groq returned an empty recipe summary.');
+            }
+
+            $suggestion = $recipe->suggestion()->firstOrCreate([], [
+                'suggestion' => $summary,
+            ]);
+        } catch (Throwable $exception) {
+            Log::error('Unable to generate a recipe suggestion.', [
+                'recipe_id' => $recipe->id,
+                'exception' => $exception,
+            ]);
+
+            return response()->json([
+                'message' => 'Unable to generate the recipe suggestion right now.',
+            ], 502);
+        }
+
+        return (new SuggestionResource($suggestion))
+            ->response()
+            ->setStatusCode(200);
     }
 }
