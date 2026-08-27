@@ -85,7 +85,9 @@ class CheckoutController extends Controller
     private function configuredPriceIds(): array
     {
         return collect(config('plans', []))
-            ->flatMap(fn (array $plan) => Arr::only($plan, ['monthly', '6_months', 'annual']))
+            ->flatMap(fn (array $plan) => array_values(
+                Arr::only($plan, ['monthly', '6_months', 'annual'])
+            ))
             ->filter()
             ->values()
             ->all();
