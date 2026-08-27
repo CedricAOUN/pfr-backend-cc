@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('users/login', [UserController::class, 'login'])->name('login');
 Route::post('users/register', [UserController::class, 'register'])->name('register');
+Route::post('users/google', [UserController::class, 'google'])->name('google.login');
 // New accounts should be auto-assigned "regular_user" on registration
 
 /*

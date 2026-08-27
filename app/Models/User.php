@@ -3,14 +3,13 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
-use App\Models\Favorite;
-use Spatie\Permission\Traits\HasRoles;
 use Laravel\Cashier\Billable;
-use Illuminate\Database\Eloquent\Casts\Attribute;
+use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 /**
  * @property string $email
@@ -18,7 +17,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens, HasRoles, Billable;
+    use Billable, HasApiTokens, HasFactory, HasRoles, Notifiable;
 
     protected $guard_name = 'sanctum';
 
@@ -31,10 +30,12 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'google_id',
+        'email_verified_at',
         'first_name',
         'last_name',
         'biography',
-        'avatar_url'
+        'avatar_url',
     ];
 
     /**
@@ -69,8 +70,13 @@ class User extends Authenticatable
     {
         return Attribute::make(
             get: function ($value) {
-                if (!$value) return null;
-                if (str_starts_with($value, 'http')) return $value; // legacy rows already absolute
+                if (! $value) {
+                    return null;
+                }
+                if (str_starts_with($value, 'http')) {
+                    return $value;
+                } // legacy rows already absolute
+
                 return url($value); // relative path -> absolute
             },
         );
