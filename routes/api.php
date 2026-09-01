@@ -163,3 +163,12 @@ Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook']
 
 Route::post('/stripe/plan-details', [CheckoutController::class, 'planDetails'])
     ->name('stripe.planDetails');
+
+/*
+|--------------------------------------------------------------------------
+| Health check
+|--------------------------------------------------------------------------
+*/
+Route::get('/health', function () {
+    return response()->json(['status' => 'ok']);
+})->name('health.check');
