@@ -125,7 +125,7 @@ class GoogleAuthenticationTest extends TestCase
         $user = User::factory()->create([
             'name' => 'existing-user',
             'email' => 'julia@example.com',
-            'password' => Hash::make('password123'),
+            'password' => Hash::make('Password123!xyz'),
         ]);
         $payload = [
             'sub' => 'google-123',
@@ -145,7 +145,7 @@ class GoogleAuthenticationTest extends TestCase
 
         $this->postJson('/api/v1/users/google', [
             'credential' => 'valid-token',
-            'password' => 'password123',
+            'password' => 'Password123!xyz',
         ])->assertOk()->assertJsonPath('user.id', $user->id);
 
         $this->assertDatabaseHas('users', ['id' => $user->id, 'google_id' => 'google-123']);
@@ -154,18 +154,24 @@ class GoogleAuthenticationTest extends TestCase
 
     public function test_manual_registration_requires_unique_username_and_returns_token(): void
     {
+        $this->mock(UncompromisedVerifier::class, function (MockInterface $mock) {
+            $mock->shouldReceive('verify')->andReturn(true);
+        });
+
         User::factory()->create(['name' => 'julia']);
 
         $this->postJson('/api/v1/users/register', [
             'name' => 'julia',
             'email' => 'another@example.com',
-            'password' => 'password123',
+            'password' => 'Password123!xyz',
+            'password_confirmation' => 'Password123!xyz',
         ])->assertUnprocessable()->assertJsonValidationErrors('name');
 
         $this->postJson('/api/v1/users/register', [
             'name' => 'marco',
             'email' => 'marco@example.com',
-            'password' => 'password123',
+            'password' => 'Password123!xyz',
+            'password_confirmation' => 'Password123!xyz',
         ])->assertOk()->assertJsonStructure(['user', 'access_token', 'token_type']);
     }
 
@@ -180,7 +186,7 @@ class GoogleAuthenticationTest extends TestCase
 
         $this->postJson('/api/v1/users/login', [
             'email' => 'google@example.com',
-            'password' => 'password123',
+            'password' => 'Password',
         ])->assertUnauthorized()->assertJsonPath('message', 'Invalid credentials');
     }
 
@@ -205,7 +211,7 @@ class GoogleAuthenticationTest extends TestCase
         $this->assertTrue(User::where('email', 'marco@example.com')->firstOrFail()->hasRole('regular_user'));
         $this->withToken($response->json('access_token'))->getJson('/api/v1/users/me')
             ->assertOk()->assertJsonPath('data.email', 'marco@example.com');
-        Exceptions::assertReported(fn (\RuntimeException $exception) => $exception === $failure);
+        Exceptions::assertReported(fn(\RuntimeException $exception) => $exception === $failure);
     }
 
     public function test_google_registration_returns_a_usable_token_when_welcome_email_fails(): void
@@ -226,7 +232,7 @@ class GoogleAuthenticationTest extends TestCase
         $this->assertTrue(User::where('google_id', 'google-mail-failure')->firstOrFail()->hasRole('regular_user'));
         $this->withToken($response->json('access_token'))->getJson('/api/v1/users/me')
             ->assertOk()->assertJsonPath('data.email', 'julia@example.com');
-        Exceptions::assertReported(fn (\RuntimeException $exception) => $exception === $failure);
+        Exceptions::assertReported(fn(\RuntimeException $exception) => $exception === $failure);
     }
 
     private function googlePayload(?array $payload, int $times = 1): void
