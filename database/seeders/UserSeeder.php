@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -14,11 +13,15 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        $password = config('app.seeder_password');
+        if (blank($password)) {
+            throw new \RuntimeException('seeder_password not set in the .env file.');
+        }
         // Admin user
         User::create([
             'name' => 'admin',
             'email' => 'admin@example.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make($password),
             'first_name' => 'Admin',
             'last_name' => 'User',
             'biography' => 'Administrateur du site.',
@@ -29,7 +32,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'chef_martin',
             'email' => 'martin@example.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make($password),
             'first_name' => 'Martin',
             'last_name' => 'Dupont',
             'biography' => 'Chef cuisinier avec 15 ans d\'expérience dans la gastronomie française.',
@@ -40,7 +43,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'chef_sophie',
             'email' => 'sophie@example.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make($password),
             'first_name' => 'Sophie',
             'last_name' => 'Bernard',
             'biography' => 'Passionnée de pâtisserie et cuisines du monde.',
@@ -51,7 +54,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'jean_cook',
             'email' => 'jean@example.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make($password),
             'first_name' => 'Jean',
             'last_name' => 'Lefevre',
             'biography' => 'Amateur de cuisine qui aime partager ses découvertes.',
@@ -62,7 +65,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'marie_foodie',
             'email' => 'marie@example.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make($password),
             'first_name' => 'Marie',
             'last_name' => 'Petit',
             'biography' => 'J\'adore cuisiner pour ma famille!',
@@ -72,7 +75,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'pierre_gourmet',
             'email' => 'pierre@example.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make($password),
             'first_name' => 'Pierre',
             'last_name' => 'Moreau',
             'biography' => 'Débutant en cuisine, toujours prêt à apprendre.',
@@ -82,7 +85,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'claire_kitchen',
             'email' => 'claire@example.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make($password),
             'first_name' => 'Claire',
             'last_name' => 'Dubois',
             'biography' => 'Fan de recettes healthy et végétariennes.',

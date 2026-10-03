@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -28,10 +29,10 @@ class UserController extends Controller
         if ($request->has('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', '%'.$search.'%')
-                    ->orWhere('email', 'like', '%'.$search.'%')
-                    ->orWhere('first_name', 'like', '%'.$search.'%')
-                    ->orWhere('last_name', 'like', '%'.$search.'%');
+                $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%')
+                    ->orWhere('first_name', 'like', '%' . $search . '%')
+                    ->orWhere('last_name', 'like', '%' . $search . '%');
             });
         }
 
@@ -57,12 +58,21 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:20|unique:users,name',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
+            'password' => [
+                'required',
+                'string',
+                'confirmed',
+                Password::min(12)
+                    ->mixedCase()      // upper + lower
+                    ->numbers()
+                    ->symbols()
+                    ->uncompromised(), // checks Have I Been Pwned
+            ],
         ]);
         $user = User::create(['name' => $validated['name'], 'email' => $validated['email'], 'password' => Hash::make($validated['password'])]);
         $user->assignRole('regular_user');
 
-        Mail::raw('Welcome to MealMosaic, '.$user->name.'!', function ($message) use ($user) {
+        Mail::raw('Welcome to MealMosaic, ' . $user->name . '!', function ($message) use ($user) {
             $message->to($user->email)->subject('New Account Registration');
         });
 
@@ -89,7 +99,8 @@ class UserController extends Controller
 
         $payload = $this->googleIdTokenVerifier->verify($validated['credential']);
 
-        if (! $payload
+        if (
+            ! $payload
             || empty($payload['sub'])
             || empty($payload['email'])
             || filter_var($payload['email'], FILTER_VALIDATE_EMAIL) === false
@@ -141,7 +152,7 @@ class UserController extends Controller
         [$user, $wasCreated] = $this->createGoogleUser($payload, $googleId, $email);
 
         if ($wasCreated) {
-            Mail::raw('Welcome to MealMosaic, '.$user->name.'!', function ($message) use ($user) {
+            Mail::raw('Welcome to MealMosaic, ' . $user->name . '!', function ($message) use ($user) {
                 $message->to($user->email)->subject('New Account Registration');
             });
         }
@@ -209,7 +220,7 @@ class UserController extends Controller
     {
         $this->authorize('update', $user);
 
-        $validated = $request->validate(['email' => 'sometimes|required|string|email|max:255|unique:users,email,'.$user->id, 'password' => 'sometimes|required|string|min:8']);
+        $validated = $request->validate(['email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $user->id, 'password' => 'sometimes|required|string|min:8']);
         if (isset($validated['email'])) {
             $user->email = $validated['email'];
         }
@@ -228,9 +239,9 @@ class UserController extends Controller
         if ($request->has('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', '%'.$search.'%')
-                    ->orWhere('first_name', 'like', '%'.$search.'%')
-                    ->orWhere('last_name', 'like', '%'.$search.'%');
+                $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('first_name', 'like', '%' . $search . '%')
+                    ->orWhere('last_name', 'like', '%' . $search . '%');
             });
         }
 
@@ -264,8 +275,8 @@ class UserController extends Controller
         $suffix = 2;
 
         while (User::where('name', $candidate)->exists()) {
-            $ending = '.'.$suffix++;
-            $candidate = Str::limit($base, 20 - strlen($ending), '').$ending;
+            $ending = '.' . $suffix++;
+            $candidate = Str::limit($base, 20 - strlen($ending), '') . $ending;
         }
 
         return $candidate;
