@@ -72,9 +72,7 @@ class UserController extends Controller
         $user = User::create(['name' => $validated['name'], 'email' => $validated['email'], 'password' => Hash::make($validated['password'])]);
         $user->assignRole('regular_user');
 
-        Mail::raw('Welcome to MealMosaic, ' . $user->name . '!', function ($message) use ($user) {
-            $message->to($user->email)->subject('New Account Registration');
-        });
+        $this->sendWelcomeEmail($user);
 
         return $this->authenticatedResponse($user);
     }
@@ -152,9 +150,7 @@ class UserController extends Controller
         [$user, $wasCreated] = $this->createGoogleUser($payload, $googleId, $email);
 
         if ($wasCreated) {
-            Mail::raw('Welcome to MealMosaic, ' . $user->name . '!', function ($message) use ($user) {
-                $message->to($user->email)->subject('New Account Registration');
-            });
+            $this->sendWelcomeEmail($user);
         }
 
         return $this->authenticatedResponse($user);
@@ -248,6 +244,18 @@ class UserController extends Controller
         $chefs = $query->get();
 
         return PublicUserResource::collection($chefs);
+    }
+
+    private function sendWelcomeEmail(User $user): void
+    {
+        try {
+            Mail::raw('Welcome to MealMosaic, ' . $user->name . '!', function ($message) use ($user) {
+                $message->to($user->email)->subject('New Account Registration');
+            });
+        } catch (\Throwable $exception) {
+            // Email delivery must not prevent an already-created user from signing in.
+            report($exception);
+        }
     }
 
     private function authenticatedResponse(User $user)

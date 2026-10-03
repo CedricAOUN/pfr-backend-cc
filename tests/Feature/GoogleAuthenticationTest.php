@@ -5,7 +5,9 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Services\GoogleIdTokenVerifier;
 use Database\Seeders\RolesAndPermissionsSeeder;
+use Illuminate\Contracts\Validation\UncompromisedVerifier;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Mockery\MockInterface;
@@ -180,6 +182,51 @@ class GoogleAuthenticationTest extends TestCase
             'email' => 'google@example.com',
             'password' => 'password123',
         ])->assertUnauthorized()->assertJsonPath('message', 'Invalid credentials');
+    }
+
+    public function test_manual_registration_returns_a_usable_token_when_welcome_email_fails(): void
+    {
+        Exceptions::fake();
+        $failure = new \RuntimeException('Welcome email delivery failed');
+        Mail::shouldReceive('raw')->once()->andThrow($failure);
+        $this->mock(UncompromisedVerifier::class, function (MockInterface $mock) {
+            $mock->shouldReceive('verify')->once()->andReturn(true);
+        });
+
+        $response = $this->postJson('/api/v1/users/register', [
+            'name' => 'marco',
+            'email' => 'marco@example.com',
+            'password' => 'Strong!Password123',
+            'password_confirmation' => 'Strong!Password123',
+        ]);
+
+        $response->assertOk()->assertJsonPath('token_type', 'Bearer');
+        $this->assertDatabaseCount('users', 1);
+        $this->assertTrue(User::where('email', 'marco@example.com')->firstOrFail()->hasRole('regular_user'));
+        $this->withToken($response->json('access_token'))->getJson('/api/v1/users/me')
+            ->assertOk()->assertJsonPath('data.email', 'marco@example.com');
+        Exceptions::assertReported(fn (\RuntimeException $exception) => $exception === $failure);
+    }
+
+    public function test_google_registration_returns_a_usable_token_when_welcome_email_fails(): void
+    {
+        Exceptions::fake();
+        $failure = new \RuntimeException('Welcome email delivery failed');
+        Mail::shouldReceive('raw')->once()->andThrow($failure);
+        $this->googlePayload([
+            'sub' => 'google-mail-failure',
+            'email' => 'julia@example.com',
+            'email_verified' => true,
+        ]);
+
+        $response = $this->postJson('/api/v1/users/google', ['credential' => 'valid-token']);
+
+        $response->assertOk()->assertJsonPath('token_type', 'Bearer');
+        $this->assertDatabaseCount('users', 1);
+        $this->assertTrue(User::where('google_id', 'google-mail-failure')->firstOrFail()->hasRole('regular_user'));
+        $this->withToken($response->json('access_token'))->getJson('/api/v1/users/me')
+            ->assertOk()->assertJsonPath('data.email', 'julia@example.com');
+        Exceptions::assertReported(fn (\RuntimeException $exception) => $exception === $failure);
     }
 
     private function googlePayload(?array $payload, int $times = 1): void
