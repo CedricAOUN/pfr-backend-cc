@@ -7,3 +7,4 @@
 /.git
 .env
 .DS_Store
+/storage/logs/*
