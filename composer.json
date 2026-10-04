@@ -41,6 +41,10 @@
         }
     },
     "scripts": {
+        "test:coverage": [
+            "@php -d xdebug.mode=coverage vendor/phpunit/phpunit/phpunit --coverage-html coverage/html --coverage-clover coverage/clover.xml",
+            "@php scripts/check-coverage.php"
+        ],
         "setup": [
             "composer install",
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
