@@ -72,15 +72,50 @@ class AuthorizationTest extends TestCase
         $target = $this->userWithRole('regular_user');
 
         Sanctum::actingAs($user, [], 'sanctum');
-        $this->deleteJson("/api/v1/users/delete/{$target->id}")
+        $this->deleteJson("/api/v1/users/delete/{$target->id}", ['password' => 'password'])
             ->assertForbidden();
-        $this->deleteJson("/api/v1/users/delete/{$user->id}")
+        $this->assertDatabaseHas('users', ['id' => $target->id]);
+
+        $this->deleteJson("/api/v1/users/delete/{$user->id}", ['password' => 'password'])
             ->assertNoContent();
+        $this->assertDatabaseMissing('users', ['id' => $user->id]);
 
         $admin = $this->userWithRole('admin');
         Sanctum::actingAs($admin, [], 'sanctum');
-        $this->deleteJson("/api/v1/users/delete/{$target->id}")
+        $this->deleteJson("/api/v1/users/delete/{$target->id}", ['password' => 'password'])
             ->assertNoContent();
+        $this->assertDatabaseMissing('users', ['id' => $target->id]);
+    }
+
+    public function test_user_deletion_requires_a_password(): void
+    {
+        $user = $this->userWithRole('regular_user');
+        Sanctum::actingAs($user, [], 'sanctum');
+
+        $this->deleteJson("/api/v1/users/delete/{$user->id}")
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('password');
+
+        $this->assertDatabaseHas('users', ['id' => $user->id]);
+    }
+
+    public function test_incorrect_deletion_password_preserves_the_account_and_access_token(): void
+    {
+        $user = $this->userWithRole('regular_user');
+        $token = $user->createToken('test-token');
+        $this->withToken($token->plainTextToken);
+
+        $this->deleteJson("/api/v1/users/delete/{$user->id}", ['password' => 'incorrect-password'])
+            ->assertUnauthorized()
+            ->assertJsonPath('message', 'Invalid password');
+
+        $this->assertDatabaseHas('users', ['id' => $user->id]);
+        $this->assertDatabaseHas('personal_access_tokens', ['id' => $token->accessToken->id]);
+
+        $this->app['auth']->forgetGuards();
+        $this->getJson('/api/v1/users/me')
+            ->assertOk()
+            ->assertJsonPath('data.id', $user->id);
     }
 
     public function test_comment_owner_fields_cannot_be_reassigned(): void
