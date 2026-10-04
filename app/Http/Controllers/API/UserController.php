@@ -176,8 +176,11 @@ class UserController extends Controller
     {
         $this->authorize('delete', $user);
 
+        $validated = $request->validate(['password' => 'required|string']);
+        if (! Hash::check($validated['password'], $user->password)) {
+            return response()->json(['message' => 'Invalid password'], 401);
+        };
         $user->delete();
-
         return response()->noContent();
     }
 
