@@ -33,6 +33,12 @@ WORKDIR /app
 ############################
 FROM base AS test
 
+# Laravel's fake image uploads need GD; keep this test dependency out of production.
+RUN apt-get update && apt-get install -y libjpeg62-turbo-dev \
+    && docker-php-ext-configure gd --with-jpeg \
+    && docker-php-ext-install gd \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Process env vars win over .env, so these force the test configuration
 ENV APP_ENV=testing \
     DB_CONNECTION=sqlite \

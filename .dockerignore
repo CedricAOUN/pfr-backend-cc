@@ -8,3 +8,6 @@
 .env
 .DS_Store
 /storage/logs/*
+
+# Rebuild Laravel manifests inside each image from its installed dependencies.
+/bootstrap/cache/*.php
