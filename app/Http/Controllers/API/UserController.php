@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\PublicUserResource;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Services\DeleteUser;
 use App\Services\GoogleIdTokenVerifier;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -172,15 +173,15 @@ class UserController extends Controller
         return new UserResource($request->user()->load('favorites'));
     }
 
-    public function destroy(Request $request, User $user)
+    public function destroy(Request $request, User $user, DeleteUser $deleteUser)
     {
         $this->authorize('delete', $user);
 
         $validated = $request->validate(['password' => 'required|string']);
         if (! Hash::check($validated['password'], $user->password)) {
             return response()->json(['message' => 'Invalid password'], 401);
-        };
-        $user->delete();
+        }
+        $deleteUser->delete($user);
         return response()->noContent();
     }
 
