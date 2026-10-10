@@ -34,6 +34,10 @@ Route::prefix('users')->group(function () {
         ->middleware('auth:sanctum')
         ->name('users.me');
 
+    Route::put('password', [UserController::class, 'changePassword'])
+        ->middleware('auth:sanctum')
+        ->name('users.changePassword');
+
     Route::get('chefs', [UserController::class, 'listChefs'])
         ->name('users.chefs');
 

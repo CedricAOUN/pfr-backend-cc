@@ -216,6 +216,27 @@ class UserController extends Controller
         return new UserResource($user);
     }
 
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => ['required', 'string', 'current_password:sanctum'],
+        ]);
+
+        $validated = $request->validate([
+            'password' => [
+                'required',
+                'string',
+                'confirmed',
+                'different:current_password',
+                Password::min(12)->mixedCase()->numbers()->symbols()->uncompromised(),
+            ],
+        ]);
+
+        $request->user()->update(['password' => Hash::make($validated['password'])]);
+
+        return response()->json(['message' => 'Password changed successfully.']);
+    }
+
     public function updateCredentials(Request $request, User $user)
     {
         $this->authorize('update', $user);
