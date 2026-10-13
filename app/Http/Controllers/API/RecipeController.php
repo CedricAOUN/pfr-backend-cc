@@ -9,8 +9,9 @@ use App\Http\Resources\SuggestionResource;
 use App\Models\Ingredient;
 use App\Models\Recipe;
 use App\Models\User;
+use App\Support\IntegrationLog;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use LucianoTonet\GroqLaravel\Facades\Groq;
 use RuntimeException;
@@ -217,15 +218,46 @@ class RecipeController extends Controller
 
     public function askAI(Request $request, Recipe $recipe)
     {
-        $this->authorizeForUser(auth('sanctum')->user(), 'view', $recipe);
-
-        $existingSuggestion = $recipe->suggestion()->first();
-
-        if ($existingSuggestion) {
-            return new SuggestionResource($existingSuggestion);
+        $startedAt = microtime(true);
+        $context = IntegrationLog::context([
+            'recipe_id' => $recipe->id,
+            'user_id' => auth('sanctum')->id(),
+            'model' => config('groq.model'),
+            'api_host' => parse_url((string) config('groq.api_base'), PHP_URL_HOST),
+            'api_key_configured' => (bool) config('groq.api_key'),
+            'timeout_seconds' => config('groq.timeout'),
+            'max_tokens' => config('groq.options.max_tokens', 150),
+        ]);
+        IntegrationLog::write('info', 'ai.request.started', $context);
+        try {
+            $this->authorizeForUser(auth('sanctum')->user(), 'view', $recipe);
+        } catch (AuthorizationException $exception) {
+            IntegrationLog::write('warning', 'ai.request.denied', [
+                ...$context, 'duration_ms' => IntegrationLog::duration($startedAt),
+            ]);
+            throw $exception;
         }
 
-        $recipe->loadMissing('ingredients');
+        $stage = 'load_suggestion';
+        try {
+            $existingSuggestion = $recipe->suggestion()->first();
+
+            if ($existingSuggestion) {
+                IntegrationLog::write('info', 'ai.request.cached', [
+                    ...$context, 'suggestion_id' => $existingSuggestion->id, 'duration_ms' => IntegrationLog::duration($startedAt),
+                ]);
+                return new SuggestionResource($existingSuggestion);
+            }
+
+            $stage = 'load_ingredients';
+            $recipe->loadMissing('ingredients');
+        } catch (Throwable $exception) {
+            IntegrationLog::write('error', 'ai.request.failed', [
+                ...$context, 'stage' => $stage, 'duration_ms' => IntegrationLog::duration($startedAt),
+                ...IntegrationLog::error($exception),
+            ]);
+            throw $exception;
+        }
 
         $ingredients = $recipe->ingredients
             ->map(fn (Ingredient $ingredient) => sprintf(
@@ -236,7 +268,12 @@ class RecipeController extends Controller
             ))
             ->implode("\n");
 
+        $stage = 'provider_request';
         try {
+            IntegrationLog::write('info', 'ai.provider.started', [
+                ...$context, 'ingredients_count' => $recipe->ingredients->count(),
+                'instructions_characters' => mb_strlen($recipe->instructions),
+            ]);
             $response = Groq::chat()->completions()->create([
                 'model' => config('groq.model'),
                 'messages' => [
@@ -253,19 +290,28 @@ class RecipeController extends Controller
                 'max_tokens' => config('groq.options.max_tokens', 150),
             ]);
 
+            $stage = 'validate_response';
             $summary = trim((string) data_get($response, 'choices.0.message.content'));
+            IntegrationLog::write('info', 'ai.provider.completed', [
+                ...$context, 'duration_ms' => IntegrationLog::duration($startedAt),
+                'response_id' => data_get($response, 'id'),
+                'finish_reason' => data_get($response, 'choices.0.finish_reason'),
+                'total_tokens' => data_get($response, 'usage.total_tokens'),
+                'output_characters' => mb_strlen($summary),
+            ]);
 
             if ($summary === '') {
                 throw new RuntimeException('Groq returned an empty recipe summary.');
             }
 
+            $stage = 'persist_suggestion';
             $suggestion = $recipe->suggestion()->firstOrCreate([], [
                 'suggestion' => $summary,
             ]);
         } catch (Throwable $exception) {
-            Log::error('Unable to generate a recipe suggestion.', [
-                'recipe_id' => $recipe->id,
-                'exception' => $exception,
+            IntegrationLog::write('error', 'ai.request.failed', [
+                ...$context, 'stage' => $stage, 'duration_ms' => IntegrationLog::duration($startedAt),
+                ...IntegrationLog::error($exception),
             ]);
 
             return response()->json([
@@ -273,6 +319,9 @@ class RecipeController extends Controller
             ], 502);
         }
 
+        IntegrationLog::write('info', 'ai.request.completed', [
+            ...$context, 'suggestion_id' => $suggestion->id, 'duration_ms' => IntegrationLog::duration($startedAt),
+        ]);
         return (new SuggestionResource($suggestion))
             ->response()
             ->setStatusCode(200);

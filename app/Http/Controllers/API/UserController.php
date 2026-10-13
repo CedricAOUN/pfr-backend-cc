@@ -8,6 +8,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\DeleteUser;
 use App\Services\GoogleIdTokenVerifier;
+use App\Support\IntegrationLog;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -273,11 +274,21 @@ class UserController extends Controller
 
     private function sendWelcomeEmail(User $user): void
     {
+        $startedAt = microtime(true);
+        $context = IntegrationLog::mailContext('welcome', $user->id);
+        IntegrationLog::write('info', 'mail.send.started', $context);
         try {
-            Mail::raw('Welcome to MealMosaic, ' . $user->name . '!', function ($message) use ($user) {
+            $sentMessage = Mail::raw('Welcome to MealMosaic, ' . $user->name . '!', function ($message) use ($user) {
                 $message->to($user->email)->subject('New Account Registration');
             });
+            IntegrationLog::write($context['delivery_mode'] === 'simulated' ? 'warning' : 'info', 'mail.send.completed', [
+                ...$context, 'duration_ms' => IntegrationLog::duration($startedAt),
+                'message_id' => $sentMessage?->getMessageId(),
+            ]);
         } catch (\Throwable $exception) {
+            IntegrationLog::write('error', 'mail.send.failed', [
+                ...$context, 'duration_ms' => IntegrationLog::duration($startedAt), ...IntegrationLog::error($exception),
+            ]);
             // Email delivery must not prevent an already-created user from signing in.
             report($exception);
         }

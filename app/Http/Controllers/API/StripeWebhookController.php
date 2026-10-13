@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Support\IntegrationLog;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
@@ -88,22 +89,26 @@ class StripeWebhookController extends CashierController
 
   protected function sendSubscriptionEmail(User $user, string $body, string $subject): void
   {
+    $startedAt = microtime(true);
+    $context = [
+      ...IntegrationLog::mailContext('subscription_webhook', $user->id),
+      'subject' => $subject,
+      'webhook_event_id' => request()->input('id'),
+      'webhook_type' => request()->input('type'),
+    ];
+    IntegrationLog::write('info', 'mail.send.started', $context);
     try {
-      Mail::raw($body, function ($message) use ($user, $subject) {
+      $sentMessage = Mail::raw($body, function ($message) use ($user, $subject) {
         $message->to($user->email)->subject($subject);
       });
 
-      Log::info('Stripe webhook: subscription email sent', [
-        'user_id' => $user->id,
-        'email' => $user->email,
-        'subject' => $subject,
+      IntegrationLog::write($context['delivery_mode'] === 'simulated' ? 'warning' : 'info', 'mail.send.completed', [
+        ...$context, 'duration_ms' => IntegrationLog::duration($startedAt),
+        'message_id' => $sentMessage?->getMessageId(),
       ]);
     } catch (\Throwable $exception) {
-      Log::error('Stripe webhook: subscription email failed', [
-        'user_id' => $user->id,
-        'email' => $user->email,
-        'subject' => $subject,
-        'error' => $exception->getMessage(),
+      IntegrationLog::write('error', 'mail.send.failed', [
+        ...$context, 'duration_ms' => IntegrationLog::duration($startedAt), ...IntegrationLog::error($exception),
       ]);
     }
   }

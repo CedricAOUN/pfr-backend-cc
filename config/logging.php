@@ -52,6 +52,15 @@ return [
 
     'channels' => [
 
+        // Independent of LOG_CHANNEL/LOG_LEVEL so integration diagnostics reach container logs.
+        'integrations' => [
+            'driver' => 'monolog',
+            'level' => env('INTEGRATION_LOG_LEVEL', 'info'),
+            'handler' => StreamHandler::class,
+            'handler_with' => ['stream' => 'php://stderr'],
+            'formatter' => \Monolog\Formatter\JsonFormatter::class,
+        ],
+
         'stack' => [
             'driver' => 'stack',
             'channels' => explode(',', (string) env('LOG_STACK', 'single')),
