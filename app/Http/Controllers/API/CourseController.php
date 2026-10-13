@@ -7,13 +7,18 @@ use App\Http\Resources\CourseResource;
 use App\Http\Resources\RedactedCourseResource;
 use App\Models\Course;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
 
 class CourseController extends Controller
 {
     public function index(Request $request)
     {
+        $validated = $request->validate(['language' => ['sometimes', 'required', 'string', Rule::in(['en', 'fr'])]]);
         $query = Course::with('expert');
+        if (isset($validated['language'])) {
+            $query->where('language', $validated['language']);
+        }
 
         if ($request->has('search')) {
             $search = $request->input('search');
@@ -39,6 +44,7 @@ class CourseController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'language' => ['required', 'string', Rule::in(['en', 'fr'])],
             'description' => 'sometimes|nullable|string',
             'content' => 'sometimes|nullable|string',
             'video' => 'nullable|file|mimes:mp4,mov,avi,wmv|max:204800', // 200 MB
@@ -52,6 +58,7 @@ class CourseController extends Controller
 
         $course = Course::create([
             'title' => $validated['title'],
+            'language' => $validated['language'],
             'description' => $validated['description'] ?? null,
             'content' => $validated['content'] ?? null,
             'video_path' => $videoPath,
@@ -67,11 +74,15 @@ class CourseController extends Controller
 
         $validated = $request->validate([
             'title' => 'sometimes|required|string|max:255',
+            'language' => ['sometimes', 'required', 'string', Rule::in(['en', 'fr'])],
             'description' => 'sometimes|nullable|string',
             'content' => 'sometimes|nullable|string',
             'video' => 'nullable|file|mimes:mp4,mov,avi,wmv|max:204800', // 200 MB
         ]);
 
+        if (isset($validated['language'])) {
+            $course->language = $validated['language'];
+        }
         if (isset($validated['title'])) {
             $course->title = $validated['title'];
         }
@@ -131,7 +142,11 @@ class CourseController extends Controller
     }
     public function listCourses(Request $request)
     {
+        $validated = $request->validate(['language' => ['sometimes', 'required', 'string', Rule::in(['en', 'fr'])]]);
         $query = Course::with('expert');
+        if (isset($validated['language'])) {
+            $query->where('language', $validated['language']);
+        }
 
         if ($request->has('search')) {
             $search = $request->input('search');

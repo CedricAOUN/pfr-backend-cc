@@ -110,7 +110,7 @@ class ContentLifecycleTest extends TestCase
         $chef = $this->user();
         Sanctum::actingAs($chef);
         $this->postJson('/api/v1/courses/create', [])->assertUnprocessable()->assertJsonValidationErrors('title');
-        $response = $this->post('/api/v1/courses/create', ['title' => 'Knife', 'content' => 'Chop', 'video' => UploadedFile::fake()->create('lesson.mp4', 5, 'video/mp4')], ['Accept' => 'application/json'])->assertSuccessful();
+        $response = $this->post('/api/v1/courses/create', ['title' => 'Knife', 'language' => 'en', 'content' => 'Chop', 'video' => UploadedFile::fake()->create('lesson.mp4', 5, 'video/mp4')], ['Accept' => 'application/json'])->assertSuccessful();
         $id = $response->json('data.id');
         $oldPath = Storage::disk('public')->allFiles('course_videos')[0];
         $this->getJson("/api/v1/courses/{$id}")->assertOk()->assertJsonPath('data.content', 'Chop');

@@ -17,6 +17,7 @@ class RedactedCourseResource extends JsonResource
     return [
       'id' => $this->id,
       'title' => $this->title,
+      'language' => $this->language,
       'created_by' => new PublicUserResource($this->whenLoaded('expert')),
       'created_at' => $this->created_at,
       'updated_at' => $this->updated_at,

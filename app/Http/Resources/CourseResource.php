@@ -21,6 +21,7 @@ class CourseResource extends JsonResource
         return [
             'id' => $this->id,
             'title' => $this->title,
+            'language' => $this->language,
             'description' => $this->description,
             'content' => $this->content,
             'video_url' => is_string($videoPath)
