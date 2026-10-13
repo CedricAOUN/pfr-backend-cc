@@ -22,12 +22,19 @@ class RecipeController extends Controller
 {
     public function index(Request $request)
     {
-        $validated = $request->validate(['category' => ['sometimes', Rule::in(Recipe::CATEGORIES)]]);
+        $validated = $request->validate([
+            'category' => ['sometimes', Rule::in(Recipe::CATEGORIES)],
+            'language' => ['sometimes', 'required', Rule::in(['en', 'fr'])],
+        ]);
         $query = Recipe::with('creator')
             ->withCount(['likes', 'favorites']);
 
         if (isset($validated['category'])) {
             $query->where('category', $validated['category']);
+        }
+
+        if (isset($validated['language'])) {
+            $query->where('language', $validated['language']);
         }
 
         if ($request->has('search')) {
@@ -111,6 +118,7 @@ class RecipeController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'category' => ['required', Rule::in(Recipe::CATEGORIES)],
+            'language' => ['required', Rule::in(['en', 'fr'])],
             'duration' => ['required', 'integer', 'min:1', 'max:4294967295'],
             'description' => 'required|string',
             'ingredients' => 'required|array',
@@ -128,6 +136,7 @@ class RecipeController extends Controller
         $recipe = Recipe::create([
             'title' => $validated['title'],
             'category' => $validated['category'],
+            'language' => $validated['language'],
             'duration' => $validated['duration'],
             'description' => $validated['description'],
             'instructions' => $validated['instructions'],
@@ -158,6 +167,7 @@ class RecipeController extends Controller
         $validated = $request->validate([
             'title' => 'string|max:255',
             'category' => ['sometimes', 'required', Rule::in(Recipe::CATEGORIES)],
+            'language' => ['sometimes', 'required', Rule::in(['en', 'fr'])],
             'duration' => ['sometimes', 'required', 'integer', 'min:1', 'max:4294967295'],
             'description' => 'string',
             'ingredients' => 'array',

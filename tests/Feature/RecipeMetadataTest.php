@@ -30,7 +30,7 @@ class RecipeMetadataTest extends TestCase
 
     private function payload(): array
     {
-        return ['title' => 'Soup', 'description' => 'Warm', 'instructions' => 'Boil', 'category' => 'starter', 'duration' => 30,
+        return ['title' => 'Soup', 'description' => 'Warm', 'instructions' => 'Boil', 'category' => 'starter', 'language' => 'en', 'duration' => 30,
             'ingredients' => [['name' => 'Carrot', 'quantity' => 2, 'unit' => 'pcs']]];
     }
 
@@ -62,7 +62,25 @@ class RecipeMetadataTest extends TestCase
 
     public static function invalidMetadata(): array
     {
-        return [['category', 'unknown'], ['category', ''], ['duration', 0], ['duration', -1], ['duration', 1.5], ['duration', 'abc'], ['duration', null], ['duration', 4294967296]];
+        return [['language', 'de'], ['language', ''], ['language', null], ['category', 'unknown'], ['category', ''], ['duration', 0], ['duration', -1], ['duration', 1.5], ['duration', 'abc'], ['duration', null], ['duration', 4294967296]];
+    }
+
+    public function test_language_is_required_saved_and_filters_recipes(): void
+    {
+        $owner = $this->owner();
+        $payload = $this->payload();
+        unset($payload['language']);
+        $this->postJson('/api/v1/recipes/create', $payload)->assertUnprocessable()->assertJsonValidationErrors('language');
+        $created = $this->postJson('/api/v1/recipes/create', $this->payload())->assertSuccessful()->assertJsonPath('data.language', 'en');
+        $id = $created->json('data.id');
+        $french = Recipe::create([...$this->payload(), 'creator_id' => $owner->id, 'language' => 'fr']);
+        $this->getJson('/api/v1/recipes?language=en&category=starter')->assertOk()->assertJsonCount(1, 'recipes')->assertJsonPath('recipes.0.id', $id);
+        $this->getJson('/api/v1/recipes?language=fr')->assertOk()->assertJsonCount(1, 'recipes')->assertJsonPath('recipes.0.id', $french->id);
+        $this->putJson('/api/v1/recipes/edit/'.$id, ['language' => 'fr'])->assertOk()->assertJsonPath('data.language', 'fr');
+        $this->getJson('/api/v1/recipes?language=en')->assertOk()->assertJsonCount(0, 'recipes');
+        $this->getJson('/api/v1/recipes?language=de')->assertUnprocessable()->assertJsonValidationErrors('language');
+        $owner->favorites()->create(['recipe_id' => $french->id]);
+        $this->getJson('/api/v1/users/me')->assertOk()->assertJsonPath('data.favorite_recipes.0.language', 'fr');
     }
 
     #[DataProvider('invalidMetadata')]
@@ -72,7 +90,7 @@ class RecipeMetadataTest extends TestCase
         $this->postJson('/api/v1/recipes/create', [...$this->payload(), $field => $value])->assertUnprocessable()->assertJsonValidationErrors($field);
         $recipe = Recipe::create([...$this->payload(), 'creator_id' => $owner->id]);
         $this->putJson('/api/v1/recipes/edit/'.$recipe->id, [$field => $value])->assertUnprocessable()->assertJsonValidationErrors($field);
-        $this->assertDatabaseHas('recipes', ['id' => $recipe->id, 'category' => 'starter', 'duration' => 30]);
+        $this->assertDatabaseHas('recipes', ['id' => $recipe->id, 'category' => 'starter', 'language' => 'en', 'duration' => 30]);
     }
 
     public function test_category_filter_combines_with_search_and_legacy_recipes_keep_unknown_metadata(): void

@@ -16,6 +16,7 @@ class Recipe extends Model
         'creator_id',
         'image_url',
         'category',
+        'language',
         'duration',
     ];
 

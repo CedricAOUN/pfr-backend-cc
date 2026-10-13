@@ -22,6 +22,7 @@ class UserResource extends JsonResource
                 $favoriteRecipeCards[] = [
                     'id' => $recipe->id,
                     'title' => $recipe->title,
+                    'language' => $recipe->language,
                     'description' => $recipe->description,
                     'image_url' => $recipe->image_url
                         ? (str_starts_with($recipe->image_url, 'http') ? $recipe->image_url : asset($recipe->image_url))

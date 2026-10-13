@@ -55,7 +55,7 @@ class ContentLifecycleTest extends TestCase
         $chef = $this->user();
         Sanctum::actingAs($chef);
         $this->postJson('/api/v1/recipes/create', [])->assertUnprocessable()->assertJsonValidationErrors(['title', 'ingredients', 'instructions']);
-        $response = $this->post('/api/v1/recipes/create', ['title' => 'Soup', 'category' => 'starter', 'duration' => 30, 'description' => 'Warm', 'instructions' => 'Boil', 'ingredients' => [['name' => 'Carrot', 'quantity' => 2, 'unit' => 'pcs']], 'image_file' => UploadedFile::fake()->image('soup.jpg')], ['Accept' => 'application/json'])->assertSuccessful();
+        $response = $this->post('/api/v1/recipes/create', ['title' => 'Soup', 'category' => 'starter', 'language' => 'en', 'duration' => 30, 'description' => 'Warm', 'instructions' => 'Boil', 'ingredients' => [['name' => 'Carrot', 'quantity' => 2, 'unit' => 'pcs']], 'image_file' => UploadedFile::fake()->image('soup.jpg')], ['Accept' => 'application/json'])->assertSuccessful();
         $id = $response->json('data.id');
         $this->assertCount(1, Storage::disk('public')->allFiles('recipe_images'));
         $this->putJson("/api/v1/recipes/edit/{$id}", ['ingredients' => [['name' => 'Salt', 'quantity' => 1, 'unit' => 'tsp']]])->assertOk()->assertJsonPath('data.ingredients.0.name', 'Salt');

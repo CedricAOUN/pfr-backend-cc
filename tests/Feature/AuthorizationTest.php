@@ -344,7 +344,7 @@ class AuthorizationTest extends TestCase
     {
         return [
             'title' => 'Created recipe',
-            'category' => 'main',
+            'category' => 'main', 'language' => 'en',
             'duration' => 30,
             'description' => 'Description',
             'instructions' => 'Instructions',

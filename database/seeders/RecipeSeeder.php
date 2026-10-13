@@ -19,6 +19,7 @@ class RecipeSeeder extends Seeder
 
         $recipe1 = Recipe::create([
             'title' => 'Tarte aux pommes traditionnelle',
+            'language' => 'fr',
             'category' => 'dessert',
             'duration' => 55,
             'description' => 'Une délicieuse tarte aux pommes à l\'ancienne, parfaite pour le dessert.',
@@ -42,6 +43,7 @@ class RecipeSeeder extends Seeder
 
         $recipe2 = Recipe::create([
             'title' => 'Risotto aux champignons',
+            'language' => 'fr',
             'category' => 'main',
             'duration' => 45,
             'description' => 'Un risotto crémeux aux champignons de Paris et cèpes séchés.',
@@ -68,6 +70,7 @@ class RecipeSeeder extends Seeder
 
         $recipe3 = Recipe::create([
             'title' => 'Poulet rôti aux herbes',
+            'language' => 'fr',
             'category' => 'main',
             'duration' => 90,
             'description' => 'Un classique indémodable, le poulet rôti parfaitement doré et parfumé.',
@@ -94,6 +97,7 @@ class RecipeSeeder extends Seeder
 
         $recipe4 = Recipe::create([
             'title' => 'Soupe de légumes d\'hiver',
+            'language' => 'fr',
             'category' => 'starter',
             'duration' => 45,
             'description' => 'Une soupe réconfortante avec des légumes de saison.',
@@ -119,6 +123,7 @@ class RecipeSeeder extends Seeder
 
         $recipe5 = Recipe::create([
             'title' => 'Crème brûlée à la vanille',
+            'language' => 'fr',
             'category' => 'dessert',
             'duration' => 180,
             'description' => 'Le dessert français par excellence, crémeux avec une croûte caramélisée.',
@@ -141,6 +146,7 @@ class RecipeSeeder extends Seeder
 
         $recipe6 = Recipe::create([
             'title' => 'Salade César maison',
+            'language' => 'fr',
             'category' => 'main',
             'duration' => 30,
             'description' => 'La célèbre salade avec sa sauce crémeuse et ses croûtons croustillants.',
