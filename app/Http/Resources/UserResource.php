@@ -48,6 +48,13 @@ class UserResource extends JsonResource
             'is_premium' => $isPremium,
             'is_chef' => $isChef,
             'premium_expire' => $subscription?->current_period_end,
+            'subscription' => $subscription ? [
+                'can_cancel' => ! $subscription->canceled() && ! $subscription->ended(),
+                'cancelled' => $subscription->onGracePeriod(),
+                'ends_at' => $subscription->ends_at,
+                'current_period_end' => $subscription->current_period_end,
+                'cancellation_email_sent' => (bool) $subscription->cancellation_email_sent_at,
+            ] : null,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'favorite_recipes' => $this->whenLoaded('favorites', fn() => $favoriteRecipeCards),

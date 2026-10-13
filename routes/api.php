@@ -7,6 +7,7 @@ use App\Http\Controllers\API\FavoriteController;
 use App\Http\Controllers\API\LikeController;
 use App\Http\Controllers\API\RecipeController;
 use App\Http\Controllers\API\StripeWebhookController;
+use App\Http\Controllers\API\SubscriptionController;
 use App\Http\Controllers\API\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -155,6 +156,9 @@ Route::prefix('courses')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/subscription/cancel', [SubscriptionController::class, 'cancel'])
+        ->name('subscription.cancel');
+
     Route::post('/checkout', [CheckoutController::class, 'create'])
         ->name('stripe.createCheckoutSession');
 
