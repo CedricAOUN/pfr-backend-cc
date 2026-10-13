@@ -51,7 +51,7 @@ class IntegrationLog
         return (int) round((microtime(true) - $startedAt) * 1000);
     }
 
-    public static function error(Throwable $exception): array
+    public static function error(Throwable $exception, array $sensitiveValues = []): array
     {
         // Database exceptions include SQL bindings, which can contain AI text.
         $message = $exception instanceof QueryException && $exception->getPrevious()
@@ -62,6 +62,9 @@ class IntegrationLog
             if (is_string($secret) && $secret !== '') $message = str_replace($secret, '[REDACTED]', $message);
         }
         $message = preg_replace('/Bearer\s+\S+|\b(?:gsk_|re_)[A-Za-z0-9_-]+/i', '[REDACTED]', $message);
+        foreach ($sensitiveValues as $value) {
+            if (is_string($value) && $value !== '') $message = str_replace($value, '[REDACTED]', $message);
+        }
         $message = preg_replace('/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i', '[email]', $message);
 
         return [

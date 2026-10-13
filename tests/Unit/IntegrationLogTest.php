@@ -38,6 +38,13 @@ class IntegrationLogTest extends TestCase
         $this->assertStringNotContainsString('Private generated recipe text', json_encode($error));
     }
 
+    public function test_reset_tokens_are_redacted_before_error_messages_are_truncated(): void
+    {
+        $token = str_repeat('secret-reset-token', 4);
+        $error = IntegrationLog::error(new RuntimeException(str_repeat('a', 1480).$token), [$token]);
+        $this->assertStringNotContainsString('secret-reset-token', $error['error_message']);
+    }
+
     public function test_diagnostics_use_json_and_do_not_depend_on_the_application_log_level(): void
     {
         config([

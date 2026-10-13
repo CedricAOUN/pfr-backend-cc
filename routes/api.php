@@ -9,6 +9,7 @@ use App\Http\Controllers\API\RecipeController;
 use App\Http\Controllers\API\StripeWebhookController;
 use App\Http\Controllers\API\SubscriptionController;
 use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\API\PasswordResetController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,6 +21,10 @@ use Illuminate\Support\Facades\Route;
 Route::post('users/login', [UserController::class, 'login'])->name('login');
 Route::post('users/register', [UserController::class, 'register'])->name('register');
 Route::post('users/google', [UserController::class, 'google'])->name('google.login');
+Route::post('users/forgot-password', [PasswordResetController::class, 'forgot'])
+    ->middleware('throttle:6,1')->name('password.forgot');
+Route::post('users/reset-password', [PasswordResetController::class, 'reset'])
+    ->middleware('throttle:6,1')->name('password.reset');
 // New accounts should be auto-assigned "regular_user" on registration
 
 /*

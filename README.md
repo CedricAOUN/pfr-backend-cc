@@ -32,6 +32,14 @@ database are required. Existing authorization and authentication tests are retai
 
 ## Email and AI diagnostics
 
+Password recovery is available at `/forgot-password` and `/reset-password` on
+the frontend. Set `FRONTEND_URL` to that frontend's public origin so reset emails
+link to the right deployment. Laravel's existing password broker stores hashed,
+single-use tokens, expiring after 60 minutes by default. Google-linked accounts
+are excluded. Requests use a generic response and are rate limited; successful
+resets revoke API tokens and stored sessions. No new database migration is needed.
+Reset emails use the configured mail transport and `password_reset` diagnostics.
+
 The `integrations` channel writes one JSON record per event to stderr, visible in
 the application's container logs. It defaults to `info`, independently of
 `LOG_CHANNEL` and `LOG_LEVEL`; set `INTEGRATION_LOG_LEVEL` to change its verbosity.
