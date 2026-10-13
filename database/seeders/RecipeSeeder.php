@@ -171,5 +171,121 @@ class RecipeSeeder extends Seeder
         ) {
             Ingredient::create(array_merge($ing, ['recipe_id' => $recipe6->id]));
         }
+
+        $englishRecipes = [
+            [
+                'title' => 'Fluffy Breakfast Pancakes',
+                'category' => 'breakfast',
+                'duration' => 25,
+                'description' => 'Light, golden pancakes served with maple syrup and fresh berries.',
+                'instructions' => "1. Mix the flour, baking powder and sugar in a bowl.\n2. Whisk the milk, egg and melted butter together.\n3. Stir the wet ingredients into the dry ingredients until just combined.\n4. Heat a non-stick pan over medium heat and cook small portions of batter until bubbles appear. Flip and cook until golden.\n5. Serve with maple syrup and berries.",
+                'image_url' => 'https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=800',
+                'ingredients' => [
+                    ['name' => 'Plain flour', 'quantity' => 200, 'unit' => 'g'],
+                    ['name' => 'Baking powder', 'quantity' => 2, 'unit' => 'tsp'],
+                    ['name' => 'Sugar', 'quantity' => 20, 'unit' => 'g'],
+                    ['name' => 'Milk', 'quantity' => 250, 'unit' => 'ml'],
+                    ['name' => 'Egg', 'quantity' => 1, 'unit' => 'pcs'],
+                    ['name' => 'Butter', 'quantity' => 30, 'unit' => 'g'],
+                    ['name' => 'Maple syrup', 'quantity' => 2, 'unit' => 'tbsp'],
+                    ['name' => 'Fresh berries', 'quantity' => 100, 'unit' => 'g'],
+                ],
+            ],
+            [
+                'title' => 'Tomato and Basil Soup',
+                'category' => 'starter',
+                'duration' => 35,
+                'description' => 'A smooth tomato soup with fresh basil, perfect with crusty bread.',
+                'instructions' => "1. Chop the onion and garlic.\n2. Heat the olive oil in a saucepan and soften the onion for 5 minutes. Add the garlic and cook for another minute.\n3. Add the tomatoes and vegetable stock, then simmer for 20 minutes.\n4. Add the basil and blend until smooth.\n5. Season with salt and pepper and serve warm.",
+                'image_url' => 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=800',
+                'ingredients' => [
+                    ['name' => 'Chopped tomatoes', 'quantity' => 800, 'unit' => 'g'],
+                    ['name' => 'Onion', 'quantity' => 1, 'unit' => 'pcs'],
+                    ['name' => 'Garlic cloves', 'quantity' => 2, 'unit' => 'pcs'],
+                    ['name' => 'Olive oil', 'quantity' => 1, 'unit' => 'tbsp'],
+                    ['name' => 'Vegetable stock', 'quantity' => 500, 'unit' => 'ml'],
+                    ['name' => 'Fresh basil', 'quantity' => 10, 'unit' => 'g'],
+                    ['name' => 'Salt', 'quantity' => 0.5, 'unit' => 'tsp'],
+                    ['name' => 'Black pepper', 'quantity' => 0.25, 'unit' => 'tsp'],
+                ],
+            ],
+            [
+                'title' => 'Lemon and Spinach Pasta',
+                'category' => 'main',
+                'duration' => 25,
+                'description' => 'A quick pasta dish with wilted spinach, lemon and Parmesan.',
+                'instructions' => "1. Cook the pasta in boiling salted water according to the packet instructions. Reserve a cup of cooking water before draining.\n2. Warm the olive oil in a large pan and gently cook the chopped garlic for 1 minute.\n3. Add the spinach and stir until wilted.\n4. Add the pasta, lemon zest, lemon juice and Parmesan. Toss with a little reserved cooking water to make a light sauce.\n5. Season with black pepper and serve immediately.",
+                'image_url' => 'https://images.unsplash.com/photo-1473093226795-af9932fe5856?w=800',
+                'ingredients' => [
+                    ['name' => 'Pasta', 'quantity' => 300, 'unit' => 'g'],
+                    ['name' => 'Fresh spinach', 'quantity' => 200, 'unit' => 'g'],
+                    ['name' => 'Lemon', 'quantity' => 1, 'unit' => 'pcs'],
+                    ['name' => 'Garlic cloves', 'quantity' => 2, 'unit' => 'pcs'],
+                    ['name' => 'Olive oil', 'quantity' => 2, 'unit' => 'tbsp'],
+                    ['name' => 'Parmesan', 'quantity' => 50, 'unit' => 'g'],
+                    ['name' => 'Salt', 'quantity' => 1, 'unit' => 'tsp'],
+                    ['name' => 'Black pepper', 'quantity' => 0.25, 'unit' => 'tsp'],
+                ],
+            ],
+            [
+                'title' => 'Crispy Rosemary Potatoes',
+                'category' => 'side',
+                'duration' => 45,
+                'description' => 'Golden roasted potatoes with rosemary and garlic.',
+                'instructions' => "1. Preheat the oven to 220 C.\n2. Wash the potatoes and cut them into small, even cubes.\n3. Toss with olive oil, chopped rosemary, crushed garlic, salt and pepper.\n4. Spread in a single layer on a baking tray.\n5. Roast for 35 minutes, turning halfway through, until crisp and tender.",
+                'image_url' => 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=800',
+                'ingredients' => [
+                    ['name' => 'Potatoes', 'quantity' => 800, 'unit' => 'g'],
+                    ['name' => 'Olive oil', 'quantity' => 3, 'unit' => 'tbsp'],
+                    ['name' => 'Fresh rosemary', 'quantity' => 5, 'unit' => 'g'],
+                    ['name' => 'Garlic cloves', 'quantity' => 3, 'unit' => 'pcs'],
+                    ['name' => 'Salt', 'quantity' => 0.5, 'unit' => 'tsp'],
+                    ['name' => 'Black pepper', 'quantity' => 0.25, 'unit' => 'tsp'],
+                ],
+            ],
+            [
+                'title' => 'Chocolate Chip Banana Bread',
+                'category' => 'dessert',
+                'duration' => 80,
+                'description' => 'A moist banana loaf dotted with chocolate chips, ideal for sharing.',
+                'instructions' => "1. Preheat the oven to 180 C and grease a loaf tin.\n2. Mash the bananas and mix with melted butter, sugar and eggs.\n3. Fold in the flour and baking powder, then stir in the chocolate chips.\n4. Pour into the tin and bake for 50 minutes, or until a skewer inserted into the centre comes out without wet batter.\n5. Cool in the tin for 15 minutes before transferring to a rack and slicing.",
+                'image_url' => 'https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=800',
+                'ingredients' => [
+                    ['name' => 'Ripe bananas', 'quantity' => 3, 'unit' => 'pcs'],
+                    ['name' => 'Plain flour', 'quantity' => 200, 'unit' => 'g'],
+                    ['name' => 'Butter', 'quantity' => 80, 'unit' => 'g'],
+                    ['name' => 'Brown sugar', 'quantity' => 100, 'unit' => 'g'],
+                    ['name' => 'Eggs', 'quantity' => 2, 'unit' => 'pcs'],
+                    ['name' => 'Baking powder', 'quantity' => 2, 'unit' => 'tsp'],
+                    ['name' => 'Chocolate chips', 'quantity' => 80, 'unit' => 'g'],
+                ],
+            ],
+            [
+                'title' => 'Berry and Yogurt Smoothie',
+                'category' => 'drink',
+                'duration' => 5,
+                'description' => 'A refreshing berry smoothie with banana and creamy yogurt.',
+                'instructions' => "1. Peel and slice the banana.\n2. Place the banana, frozen berries, yogurt and milk in a blender.\n3. Blend until smooth, adding a splash more milk if needed.\n4. Pour into glasses and serve immediately.",
+                'image_url' => 'https://images.unsplash.com/photo-1505252585461-04db1eb84625?w=800',
+                'ingredients' => [
+                    ['name' => 'Frozen mixed berries', 'quantity' => 200, 'unit' => 'g'],
+                    ['name' => 'Banana', 'quantity' => 1, 'unit' => 'pcs'],
+                    ['name' => 'Plain yogurt', 'quantity' => 150, 'unit' => 'g'],
+                    ['name' => 'Milk', 'quantity' => 200, 'unit' => 'ml'],
+                ],
+            ],
+        ];
+
+        foreach ($englishRecipes as $data) {
+            $ingredients = $data['ingredients'];
+            unset($data['ingredients']);
+            $recipe = Recipe::create([
+                ...$data,
+                'language' => 'en',
+                'is_premium' => false,
+                'creator_id' => $users->where('name', 'chef_martin')->first()->id,
+            ]);
+            $recipe->ingredients()->createMany($ingredients);
+        }
     }
 }
