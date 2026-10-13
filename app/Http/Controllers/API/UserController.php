@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PublicUserResource;
 use App\Http\Resources\UserResource;
+use App\Mail\AccountDeleted;
 use App\Models\User;
 use App\Services\DeleteUser;
 use App\Services\GoogleIdTokenVerifier;
@@ -187,6 +188,7 @@ class UserController extends Controller
             }
         }
         $deleteUser->delete($user);
+        $this->sendAccountDeletedEmail($user);
         return response()->noContent();
     }
 
@@ -295,6 +297,25 @@ class UserController extends Controller
             ]);
             // Email delivery must not prevent an already-created user from signing in.
             report($exception);
+        }
+    }
+
+    private function sendAccountDeletedEmail(User $user): void
+    {
+        $startedAt = microtime(true);
+        $context = IntegrationLog::mailContext('account_deleted', $user->id);
+        IntegrationLog::write('info', 'mail.send.started', $context);
+        try {
+            $sentMessage = Mail::to($user->email)->send(new AccountDeleted($user->name));
+            IntegrationLog::write($context['delivery_mode'] === 'simulated' ? 'warning' : 'info', 'mail.send.completed', [
+                ...$context, 'duration_ms' => IntegrationLog::duration($startedAt),
+                'message_id' => $sentMessage?->getMessageId(),
+            ]);
+        } catch (\Throwable $exception) {
+            // The account has already been deleted; delivery failures cannot restore it.
+            IntegrationLog::write('error', 'mail.send.failed', [
+                ...$context, 'duration_ms' => IntegrationLog::duration($startedAt), ...IntegrationLog::error($exception),
+            ]);
         }
     }
 
