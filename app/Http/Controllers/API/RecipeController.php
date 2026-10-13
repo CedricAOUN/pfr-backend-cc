@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Support\IntegrationLog;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
 use LucianoTonet\GroqLaravel\Facades\Groq;
 use RuntimeException;
@@ -21,8 +22,13 @@ class RecipeController extends Controller
 {
     public function index(Request $request)
     {
+        $validated = $request->validate(['category' => ['sometimes', Rule::in(Recipe::CATEGORIES)]]);
         $query = Recipe::with('creator')
             ->withCount(['likes', 'favorites']);
+
+        if (isset($validated['category'])) {
+            $query->where('category', $validated['category']);
+        }
 
         if ($request->has('search')) {
             $search = $request->input('search');
@@ -104,6 +110,8 @@ class RecipeController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'category' => ['required', Rule::in(Recipe::CATEGORIES)],
+            'duration' => ['required', 'integer', 'min:1', 'max:4294967295'],
             'description' => 'required|string',
             'ingredients' => 'required|array',
             'ingredients.*.name' => 'required|string',
@@ -119,6 +127,8 @@ class RecipeController extends Controller
 
         $recipe = Recipe::create([
             'title' => $validated['title'],
+            'category' => $validated['category'],
+            'duration' => $validated['duration'],
             'description' => $validated['description'],
             'instructions' => $validated['instructions'],
             'is_premium' => $validated['is_premium'] ?? false,
@@ -147,6 +157,8 @@ class RecipeController extends Controller
 
         $validated = $request->validate([
             'title' => 'string|max:255',
+            'category' => ['sometimes', 'required', Rule::in(Recipe::CATEGORIES)],
+            'duration' => ['sometimes', 'required', 'integer', 'min:1', 'max:4294967295'],
             'description' => 'string',
             'ingredients' => 'array',
             'ingredients.*.name' => 'string',

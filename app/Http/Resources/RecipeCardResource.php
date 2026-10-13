@@ -15,6 +15,8 @@ class RecipeCardResource extends JsonResource
         return [
             'id' => $this->id,
             'title' => $this->title,
+            'category' => $this->category,
+            'duration' => $this->duration,
             'description' => $this->description,
             'is_premium' => $this->is_premium,
             'image_url' => $this->image_url

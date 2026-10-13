@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Recipe extends Model
 {
+    public const CATEGORIES = ['breakfast', 'starter', 'main', 'side', 'dessert', 'snack', 'drink', 'other'];
+
     protected $fillable = [
         'title',
         'description',
@@ -13,6 +15,8 @@ class Recipe extends Model
         'is_premium',
         'creator_id',
         'image_url',
+        'category',
+        'duration',
     ];
 
     public function creator()
@@ -49,6 +53,7 @@ class Recipe extends Model
     {
         return [
             'is_premium' => 'boolean',
+            'duration' => 'integer',
         ];
     }
 }

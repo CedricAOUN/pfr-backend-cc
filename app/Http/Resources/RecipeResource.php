@@ -28,6 +28,8 @@ class RecipeResource extends JsonResource
         return [
             'id' => $this->id,
             'title' => $this->title,
+            'category' => $this->category,
+            'duration' => $this->duration,
             'description' => $this->description,
             'ingredients' => IngredientResource::collection($this->whenLoaded('ingredients') ?: collect()),
             'instructions' => $this->instructions,
