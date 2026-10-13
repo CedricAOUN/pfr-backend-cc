@@ -19,6 +19,8 @@ class RecipeSeeder extends Seeder
 
         $recipe1 = Recipe::create([
             'title' => 'Tarte aux pommes traditionnelle',
+            'category' => 'dessert',
+            'duration' => 55,
             'description' => 'Une délicieuse tarte aux pommes à l\'ancienne, parfaite pour le dessert.',
             'instructions' => 'Préchauffer le four à 180°C. Éplucher et couper les pommes en fines tranches. Disposer la pâte dans un moule, piquer le fond. Disposer les pommes en rosace. Saupoudrer de sucre et de cannelle. Parsemer de noisettes de beurre. Enfourner 35 minutes.',
             'is_premium' => false,
@@ -40,6 +42,8 @@ class RecipeSeeder extends Seeder
 
         $recipe2 = Recipe::create([
             'title' => 'Risotto aux champignons',
+            'category' => 'main',
+            'duration' => 45,
             'description' => 'Un risotto crémeux aux champignons de Paris et cèpes séchés.',
             'instructions' => 'Réhydrater les cèpes. Faire revenir l\'oignon dans le beurre. Ajouter le riz et nacrer. Déglacer au vin blanc. Ajouter le bouillon louche par louche en remuant. À mi-cuisson, ajouter les champignons. Finir avec le parmesan et une noix de beurre.',
             'is_premium' => true,
@@ -64,6 +68,8 @@ class RecipeSeeder extends Seeder
 
         $recipe3 = Recipe::create([
             'title' => 'Poulet rôti aux herbes',
+            'category' => 'main',
+            'duration' => 90,
             'description' => 'Un classique indémodable, le poulet rôti parfaitement doré et parfumé.',
             'instructions' => 'Préchauffer le four à 200°C. Préparer un beurre aux herbes. Glisser le beurre sous la peau du poulet. Mettre le citron et l\'ail dans la cavité. Saler, poivrer. Enfourner 1h15 en arrosant régulièrement.',
             'is_premium' => false,
@@ -88,6 +94,8 @@ class RecipeSeeder extends Seeder
 
         $recipe4 = Recipe::create([
             'title' => 'Soupe de légumes d\'hiver',
+            'category' => 'starter',
+            'duration' => 45,
             'description' => 'Une soupe réconfortante avec des légumes de saison.',
             'instructions' => 'Éplucher et couper tous les légumes en morceaux. Les mettre dans une grande casserole avec de l\'eau. Porter à ébullition et cuire 30 minutes. Mixer. Assaisonner et servir avec une cuillère de crème fraîche.',
             'is_premium' => false,
@@ -111,6 +119,8 @@ class RecipeSeeder extends Seeder
 
         $recipe5 = Recipe::create([
             'title' => 'Crème brûlée à la vanille',
+            'category' => 'dessert',
+            'duration' => 180,
             'description' => 'Le dessert français par excellence, crémeux avec une croûte caramélisée.',
             'instructions' => 'Chauffer la crème avec la vanille fendue. Fouetter les jaunes avec le sucre. Verser la crème chaude sur les jaunes en fouettant. Répartir dans des ramequins. Cuire au bain-marie à 150°C pendant 45 min. Réfrigérer. Saupoudrer de sucre et caraméliser au chalumeau.',
             'is_premium' => true,
@@ -131,6 +141,8 @@ class RecipeSeeder extends Seeder
 
         $recipe6 = Recipe::create([
             'title' => 'Salade César maison',
+            'category' => 'main',
+            'duration' => 30,
             'description' => 'La célèbre salade avec sa sauce crémeuse et ses croûtons croustillants.',
             'instructions' => 'Préparer les croûtons dorés à l\'ail. Griller le poulet. Préparer la sauce: mixer jaune d\'œuf, ail, anchois, citron, puis émulsionner avec l\'huile. Mélanger la salade avec la sauce, ajouter poulet, croûtons et copeaux de parmesan.',
             'is_premium' => true,
