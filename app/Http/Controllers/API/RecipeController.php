@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Rules\AllowedPublicText;
 use App\Http\Resources\RecipeCardResource;
 use App\Http\Resources\RecipeResource;
 use App\Http\Resources\SuggestionResource;
@@ -116,16 +117,16 @@ class RecipeController extends Controller
         $user = auth('sanctum')->user();
 
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
+            'title' => ['required', 'string', 'max:255', new AllowedPublicText],
             'category' => ['required', Rule::in(Recipe::CATEGORIES)],
             'language' => ['required', Rule::in(['en', 'fr'])],
             'duration' => ['required', 'integer', 'min:1', 'max:4294967295'],
-            'description' => 'required|string',
+            'description' => ['required', 'string', new AllowedPublicText],
             'ingredients' => 'required|array',
-            'ingredients.*.name' => 'required|string',
+            'ingredients.*.name' => ['required', 'string', new AllowedPublicText],
             'ingredients.*.quantity' => 'required|numeric',
             'ingredients.*.unit' => 'required|string',
-            'instructions' => 'required|string',
+            'instructions' => ['required', 'string', new AllowedPublicText],
             'image_file' => 'nullable|image|max:2048', // max 2MB
             'is_premium' => 'boolean',
         ]);
@@ -165,16 +166,16 @@ class RecipeController extends Controller
         $this->authorize('update', $recipe);
 
         $validated = $request->validate([
-            'title' => 'string|max:255',
+            'title' => ['string', 'max:255', new AllowedPublicText],
             'category' => ['sometimes', 'required', Rule::in(Recipe::CATEGORIES)],
             'language' => ['sometimes', 'required', Rule::in(['en', 'fr'])],
             'duration' => ['sometimes', 'required', 'integer', 'min:1', 'max:4294967295'],
-            'description' => 'string',
+            'description' => ['string', new AllowedPublicText],
             'ingredients' => 'array',
-            'ingredients.*.name' => 'string',
+            'ingredients.*.name' => ['string', new AllowedPublicText],
             'ingredients.*.quantity' => 'numeric',
             'ingredients.*.unit' => 'string',
-            'instructions' => 'string',
+            'instructions' => ['string', new AllowedPublicText],
             'image_file' => 'nullable|image|max:2048', // max 2MB
             'is_premium' => 'boolean',
         ]);

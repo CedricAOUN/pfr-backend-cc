@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Rules\AllowedPublicText;
 use App\Http\Resources\CourseResource;
 use App\Http\Resources\RedactedCourseResource;
 use App\Models\Course;
@@ -43,10 +44,10 @@ class CourseController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
+            'title' => ['required', 'string', 'max:255', new AllowedPublicText],
             'language' => ['required', 'string', Rule::in(['en', 'fr'])],
-            'description' => 'sometimes|nullable|string',
-            'content' => 'sometimes|nullable|string',
+            'description' => ['sometimes', 'nullable', 'string', new AllowedPublicText],
+            'content' => ['sometimes', 'nullable', 'string', new AllowedPublicText],
             'video' => 'nullable|file|mimes:mp4,mov,avi,wmv|max:204800', // 200 MB
         ]);
 
@@ -73,10 +74,10 @@ class CourseController extends Controller
         $this->authorize('update', $course);
 
         $validated = $request->validate([
-            'title' => 'sometimes|required|string|max:255',
+            'title' => ['sometimes', 'required', 'string', 'max:255', new AllowedPublicText],
             'language' => ['sometimes', 'required', 'string', Rule::in(['en', 'fr'])],
-            'description' => 'sometimes|nullable|string',
-            'content' => 'sometimes|nullable|string',
+            'description' => ['sometimes', 'nullable', 'string', new AllowedPublicText],
+            'content' => ['sometimes', 'nullable', 'string', new AllowedPublicText],
             'video' => 'nullable|file|mimes:mp4,mov,avi,wmv|max:204800', // 200 MB
         ]);
 

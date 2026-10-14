@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Rules\AllowedPublicText;
 use App\Models\Comment;
 use Illuminate\Http\Request;
 
@@ -17,7 +18,7 @@ class CommentController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'content' => 'required|string',
+            'content' => ['required', 'string', new AllowedPublicText],
             'recipe_id' => 'required|exists:recipes,id',
         ]);
 
@@ -35,7 +36,7 @@ class CommentController extends Controller
         $this->authorize('update', $comment);
 
         $validated = $request->validate([
-            'content' => 'sometimes|required|string',
+            'content' => ['sometimes', 'required', 'string', new AllowedPublicText],
         ]);
 
         $comment->update($validated);

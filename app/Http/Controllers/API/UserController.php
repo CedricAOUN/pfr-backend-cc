@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Rules\AllowedPublicText;
 use App\Http\Resources\PublicUserResource;
 use App\Http\Resources\UserResource;
 use App\Mail\AccountDeleted;
@@ -59,7 +60,7 @@ class UserController extends Controller
     public function register(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:20|unique:users,name',
+            'name' => ['required', 'string', 'max:20', 'unique:users,name', new AllowedPublicText],
             'email' => 'required|string|email|max:255|unique:users',
             'password' => [
                 'required',
@@ -202,10 +203,11 @@ class UserController extends Controller
                 'string',
                 'max:20',
                 Rule::unique('users', 'name')->ignore($user->id),
+                new AllowedPublicText,
             ],
             'first_name' => 'sometimes|nullable|string|max:255',
             'last_name' => 'sometimes|nullable|string|max:255',
-            'biography' => 'sometimes|nullable|string',
+            'biography' => ['sometimes', 'nullable', 'string', new AllowedPublicText],
             'avatar_url' => 'sometimes|nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
@@ -340,6 +342,7 @@ class UserController extends Controller
             ? implode(' ', $parts)
             : ($this->optionalString($payload['name'] ?? null) ?: Str::before($email, '@'));
         $base = Str::limit(Str::slug($source, '.') ?: 'user', 20, '');
+        (new AllowedPublicText)->validate('name', $base, function () use (&$base) { $base = 'user'; });
         $candidate = $base;
         $suffix = 2;
 

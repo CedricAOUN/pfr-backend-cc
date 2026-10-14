@@ -51,6 +51,12 @@ class GoogleAuthenticationTest extends TestCase
         $this->assertTrue($user->hasRole('regular_user'));
     }
 
+    public function test_google_signup_uses_a_safe_public_username_without_blocking_authentication(): void
+    {
+        $this->googlePayload(['sub' => 'moderated-user', 'email' => 'person@example.com', 'email_verified' => true, 'name' => 'fucker']);
+        $this->postJson('/api/v1/users/google', ['credential' => 'valid-token'])->assertOk()->assertJsonPath('user.name', 'user');
+    }
+
     public function test_google_login_uses_profile_fallbacks_and_suffixes_username_collisions(): void
     {
         User::factory()->create(['name' => 'julia.child']);
