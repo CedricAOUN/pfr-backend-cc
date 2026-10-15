@@ -30,6 +30,40 @@ Groq and Stripe are mocked at their integration boundaries; billing tests reject
 unexpected Stripe transport calls. No live service credentials or production
 database are required. Existing authorization and authentication tests are retained.
 
+## Gmail SMTP for demo testing
+
+Enable 2-Step Verification on the Google account used to send emails, then create
+an app password at https://myaccount.google.com/apppasswords (for example, name it
+`MealMosaic demo`). See Google's [app password instructions](https://support.google.com/accounts/answer/185833).
+
+In the backend's private `.env` file, configure:
+
+```dotenv
+MAIL_MAILER=smtp
+MAIL_SCHEME=smtps
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=465
+MAIL_USERNAME=your-address@gmail.com
+MAIL_PASSWORD=your-16-character-app-password
+MAIL_FROM_ADDRESS="${MAIL_USERNAME}"
+MAIL_FROM_NAME="MealMosaic"
+```
+
+Replace the username and password placeholders. Paste the app password without
+its grouping spaces; do not use your normal Google password. Keep these values
+in the backend environment only, outside version control and frontend variables.
+Remove any `MAIL_URL` override so the SMTP settings above take effect.
+
+Run `php artisan config:clear` from the backend directory after updating `.env`.
+Restart any long-running queue workers to reload the settings. For a hosted demo,
+set the same environment variables on the deployed backend and rebuild its config
+cache if used. Local `.env` edits do not update the hosted site's configuration.
+
+Test one account email before inviting the group. A personal Gmail account's
+[sending limits](https://support.google.com/mail/answer/22839) apply to the entire
+account, including personal messages; there is no five-recipient sandbox limit.
+For local testing without delivery, set `MAIL_MAILER=log`.
+
 ## Email and AI diagnostics
 
 Password recovery is available at `/forgot-password` and `/reset-password` on
