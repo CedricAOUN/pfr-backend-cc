@@ -6,6 +6,8 @@ use App\Models\Course;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Http\File;
+use Illuminate\Support\Facades\Storage;
 
 class CourseSeeder extends Seeder
 {
@@ -15,6 +17,17 @@ class CourseSeeder extends Seeder
     public function run(): void
     {
         $users = User::all();
+        $videoPath = Storage::disk('public')->putFileAs(
+            'course_videos',
+            new File(database_path('seeders/videos/4253143-uhd_2160_4096_25fps.mp4')),
+            '4253143-uhd_2160_4096_25fps.mp4',
+        );
+
+        if ($videoPath === false) {
+            throw new \RuntimeException('Unable to store the seeded course video.');
+        }
+
+        $videoUrl = '/storage/'.$videoPath;
 
         Course::create([
             'language' => 'fr',
@@ -35,6 +48,7 @@ class CourseSeeder extends Seeder
         Course::create([
             'language' => 'fr',
             'title' => 'Cuisine asiatique pour débutants',
+            'video_path' => $videoUrl,
             'description' => 'Introduction aux techniques et saveurs de la cuisine asiatique. Wok, vapeur, marinades et sauces typiques.',
             'content' => 'Dans ce cours, vous apprendrez les bases de la cuisine asiatique, y compris la préparation des ingrédients, les techniques de cuisson et les recettes typiques.',
             'expert_id' => $users->where('name', 'chef_sophie')->first()->id,
@@ -64,6 +78,7 @@ class CourseSeeder extends Seeder
             ],
             [
                 'title' => 'Fresh Pasta from Scratch',
+                'video_path' => $videoUrl,
                 'description' => 'Learn to mix, knead, roll and cook a simple fresh egg pasta dough.',
                 'content' => "# Fresh Pasta from Scratch\n\n## Make the dough\nMix 200 g of plain flour with 2 eggs. Bring the mixture together and knead until smooth. Cover and rest for 30 minutes.\n\n## Roll and shape\n1. Divide the dough into manageable pieces.\n2. Roll each piece thinly, dusting lightly with flour to prevent sticking.\n3. Cut into ribbons and separate them on a floured tray.\n\n## Cook and finish\nCook in boiling salted water until tender, usually 2 to 4 minutes depending on thickness. Taste a strand to check. Toss with your favourite sauce and a little pasta water.",
             ],
